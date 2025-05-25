@@ -5,126 +5,52 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Stacked Fraction Input Styling */
-.fraction-input-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100px; /* Adjust as needed */
+/* --- Consistent App Header / Navigation --- */
+.app-header {
+    z-index: 10; 
 }
-.fraction-input {
-    width: 100%;
-    padding: 0.5rem;
-    text-align: center;
-    border: 1px solid #D1D5DB; /* Tailwind gray-300 */
-    border-radius: 0.375rem; /* Tailwind rounded-md */
-    font-size: 1.125rem; /* Tailwind text-lg */
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* Tailwind shadow-sm */
+.dropdown-content {
+    /* Uses navBg from Tailwind config in HTML */
+    border: 1px solid rgba(255, 255, 255, 0.15); /* Slightly more visible border on dark bg */
 }
-.fraction-input.numerator {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    margin-bottom: -1px; /* Overlap border slightly */
+.dropdown-content a {
+    transition: background-color 0.15s ease-in-out;
+    /* text color is white via Tailwind */
 }
-.fraction-input.denominator {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
+.dropdown-content a:hover {
+    /* background-color uses navHoverBg from Tailwind config */
 }
-.fraction-line {
-    width: 80%;
-    height: 2px;
-    background-color: #333333; /* textDark */
-    margin: 2px 0;
+.dropdown-content a:last-child {
+    border-bottom-left-radius: 0.375rem; 
+    border-bottom-right-radius: 0.375rem; 
 }
-/* Focus styling for inputs */
-#numerator1:focus, #denominator1:focus {
-    border-color: #FF6347; /* primary */
-    box-shadow: 0 0 0 3px rgba(255, 99, 71, 0.3);
-    z-index: 1; /* Bring focused input to front */
-}
-#numerator2:focus, #denominator2:focus {
-    border-color: #32CD32; /* fractionTwo */
-    box-shadow: 0 0 0 3px rgba(50, 205, 50, 0.3);
-    z-index: 1;
+.dropdown-content a:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
 }
 
 
-/* Pizza Slice Styling */
-.pizza-slice {
-    stroke: #FFF8DC; /* Cornsilk - color of crust/separators */
-    stroke-width: 2;
-    transition: fill 0.3s ease-in-out, opacity 0.3s ease-in-out;
-}
-.pizza-slice.filled-f1 {
-    fill: #FF6347; /* Tomato - primary color for fraction 1 */
-    opacity: 1;
-}
-.pizza-slice.empty-f1 {
-    fill: #FFD700; /* Gold - secondary color for empty slices for F1 */
-    opacity: 0.7;
-}
-
-/* Fraction 2 Pizza specific */
-.pizza-slice-f2 {
-    stroke-dasharray: 4, 2; /* Dotted line for F2 separators */
-    fill-opacity: 0.6; /* Semi-transparent fill for F2 */
-}
-.pizza-slice-f2.filled-f2 {
-    fill: #32CD32; /* LimeGreen - color for fraction 2 */
-}
-.pizza-slice-f2.empty-f2 {
-    fill: #FFD700; /* Gold - for empty F2 parts, also semi-transparent */
-    opacity: 0.3; /* Make empty F2 parts even more subtle */
-}
-
-
-/* Rectangle Segment Styling */
-.rectangle-grid { /* Container for each fraction's grid */
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%; /* Fill parent's content area */
-    display: flex;
-    flex-direction: column;
-}
-.rectangle-row {
-    display: flex;
-    width: 100%;
-    flex-grow: 1; /* Rows share height equally within their grid */
-}
-.rectangle-segment {
-    flex-grow: 1; /* Segments share width equally in a row */
-    border: 1px solid #FFF8DC; /* Cornsilk - separator */
-    transition: background-color 0.3s ease-in-out;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 0.7rem;
-    box-sizing: border-box;
-}
-
-.rectangle-segment.filled-f1 {
-    background-color: #FF6347; /* Tomato */
-}
-.rectangle-segment.empty-f1 {
-    background-color: #FFD700; /* Gold */
-    opacity: 0.7;
-}
-
-/* Fraction 2 Rectangle specific */
-.rectangle-segment-f2 {
-    border-style: dashed !important;
-    border-width: 1px !important;
-    border-color: #32CD32 !important;
-}
-.rectangle-segment-f2.filled-f2 {
-    background-color: rgba(50, 205, 50, 0.6); /* fractionTwoFill from Tailwind config */
-}
-.rectangle-segment-f2.empty-f2 {
-    background-color: rgba(255, 215, 0, 0.3); /* Gold, more transparent */
-}
-
-
-/* Number Line Styling */
+/* --- FRACTIONS GAME STYLES --- */
+.fraction-input-wrapper { display: flex; flex-direction: column; align-items: center; width: 100px; }
+.fraction-input { width: 100%; padding: 0.5rem; text-align: center; border: 1px solid #D1D5DB; border-radius: 0.375rem; font-size: 1.125rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+.fraction-input.numerator { border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: -1px; }
+.fraction-input.denominator { border-top-left-radius: 0; border-top-right-radius: 0; }
+.fraction-line { width: 80%; height: 2px; background-color: #333333; margin: 2px 0; }
+#numerator1:focus, #denominator1:focus { border-color: #FF6347; box-shadow: 0 0 0 3px rgba(255, 99, 71, 0.3); z-index: 1; }
+#numerator2:focus, #denominator2:focus { border-color: #32CD32; box-shadow: 0 0 0 3px rgba(50, 205, 50, 0.3); z-index: 1; }
+.pizza-slice { stroke: #FFF8DC; stroke-width: 2; transition: fill 0.3s ease-in-out, opacity 0.3s ease-in-out; }
+.pizza-slice.filled-f1 { fill: #FF6347; opacity: 1; }
+.pizza-slice.empty-f1 { fill: #FFD700; opacity: 0.7; }
+.pizza-slice-f2 { stroke-dasharray: 4, 2; fill-opacity: 0.6; }
+.pizza-slice-f2.filled-f2 { fill: #32CD32; }
+.pizza-slice-f2.empty-f2 { fill: #FFD700; opacity: 0.3; }
+.rectangle-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; }
+.rectangle-row { display: flex; width: 100%; flex-grow: 1; }
+.rectangle-segment { flex-grow: 1; border: 1px solid #FFF8DC; transition: background-color 0.3s ease-in-out; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7rem; box-sizing: border-box; }
+.rectangle-segment.filled-f1 { background-color: #FF6347; }
+.rectangle-segment.empty-f1 { background-color: #FFD700; opacity: 0.7; }
+.rectangle-segment-f2 { border-style: dashed !important; border-width: 1px !important; border-color: #32CD32 !important; }
+.rectangle-segment-f2.filled-f2 { background-color: rgba(50, 205, 50, 0.6); }
+.rectangle-segment-f2.empty-f2 { background-color: rgba(255, 215, 0, 0.3); }
 #number-line-svg .line-path { stroke: #333333; stroke-width: 2; }
 #number-line-svg .tick-major { stroke: #333333; stroke-width: 2; }
 #number-line-svg .tick-minor { stroke: #aaaaaa; stroke-width: 1; }
@@ -133,14 +59,111 @@ body {
 #number-line-svg .label-f1 { fill: #FF6347; font-size: 10px; font-family: 'Inter', sans-serif; text-anchor: middle; }
 #number-line-svg .label-f2 { fill: #32CD32; font-size: 10px; font-family: 'Inter', sans-serif; text-anchor: middle; }
 #number-line-svg .label-axis { fill: #333333; font-size: 12px; font-family: 'Inter', sans-serif; text-anchor: middle; }
+#pizza-container svg { display: block; margin: auto; }
 
+/* --- CLOCKS GAME STYLES --- */
+#analog-clock-container { touch-action: none; cursor: default; /* Default cursor, JS will change for hands */ }
+
+/* Analog Hand Highlighting on HOVER (JS will add these classes) */
+#hour-hand.hand-hoverable { cursor: grab; }
+#minute-hand.hand-hoverable { cursor: grab; }
+#second-hand.hand-hoverable { cursor: grab; }
+
+#hour-hand.hand-hover-active { stroke: #FF6347 !important; /* Primary color */ filter: drop-shadow(0 0 5px #FF6347); }
+#minute-hand.hand-hover-active { stroke: #FFD700 !important; /* Secondary color */ filter: drop-shadow(0 0 5px #FFD700); }
+#second-hand.hand-hover-active { stroke: #32CD32 !important; /* FractionTwo color */ filter: drop-shadow(0 0 5px #32CD32); }
+
+/* Analog Hand Highlighting on DRAG */
+#hour-hand.hand-dragging, 
+#minute-hand.hand-dragging, 
+#second-hand.hand-dragging {
+    cursor: grabbing !important;
+}
+#hour-hand.hand-dragging { 
+    stroke: #d35400 !important; /* Pumpkin Orange - even more distinct */
+    stroke-width: 11px !important; 
+    filter: drop-shadow(0 0 8px #d35400);
+}
+#minute-hand.hand-dragging { 
+    stroke: #1a2531 !important; /* Very Dark Blue - even more distinct */
+    stroke-width: 8px !important; 
+    filter: drop-shadow(0 0 8px #1a2531);
+}
+#second-hand.hand-dragging { 
+    stroke: #16a085 !important; /* Green Sea - even more distinct */
+    stroke-width: 6px !important; 
+    filter: drop-shadow(0 0 8px #16a085);
+}
+
+
+#digital-clock-display-wrapper { margin-left: auto; margin-right: auto; }
+#digital-clock-display {
+    letter-spacing: 0.05em; 
+    line-height: 1; 
+    padding: 0.5rem 0.25rem; 
+    /* Font size set by Tailwind classes on parent, e.g., text-5xl md:text-6xl */
+}
+
+.digital-clock-interactive .digital-segment,
+.digital-clock-interactive .digital-colon {
+    flex-grow: 1; 
+    flex-basis: 0; 
+    text-align: center;
+    white-space: nowrap; 
+    min-width: 1.9em; /* Orbitron is wide */
+    font-size: 1em; 
+}
+.digital-clock-interactive .digital-colon {
+    flex-grow: 0.4; 
+    min-width: 0.4em;
+}
+
+.digital-clock-interactive .digital-segment {
+    cursor: pointer;
+    padding: 0 0.1em; 
+    border-radius: 0.25rem;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out, transform 0.1s ease-in-out;
+    user-select: none; 
+}
+/* Highlight for corresponding digital segment when analog hand is hovered */
+.digital-clock-interactive .digital-segment.analog-hover-highlight {
+    background-color: rgba(70, 130, 180, 0.3) !important; /* Accent color, semi-transparent */
+    color: #A8D8F8 !important; /* Lighter shade of accent */
+    transform: scale(1.05);
+    outline: 1px solid #4682B4;
+}
+.digital-clock-interactive .digital-segment:hover,
+.digital-clock-interactive .digital-segment:focus {
+    background-color: rgba(46, 204, 113, 0.25); 
+    color: #58D68D; 
+    outline: 1px dashed rgba(46, 204, 113, 0.7);
+    transform: scale(1.02);
+}
+.digital-clock-interactive .digital-segment.editing { 
+    background-color: rgba(46, 204, 113, 0.3);
+    color: #82E0AA;
+}
+
+.digital-segment-input {
+    font-family: 'Orbitron', sans-serif;
+    font-size: inherit; 
+    line-height: inherit; 
+    color: inherit; 
+    background-color: transparent; 
+    border: none;
+    outline: none;
+    width: 100%; 
+    text-align: center;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    caret-color: #2ECC71; 
+}
+.digital-segment-input::-webkit-inner-spin-button,
+.digital-segment-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.digital-segment-input[type=number] { -moz-appearance: textfield; }
 
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; }
-
-#pizza-container svg {
-    display: block;
-    margin: auto;
-}
 

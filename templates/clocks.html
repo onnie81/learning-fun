@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clocks and Time - Vivi's Learning Corner</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'fredoka': ['"Fredoka One"', 'cursive'],
+                        'inter': ['Inter', 'sans-serif'],
+                        'orbitron': ['Orbitron', 'sans-serif'] 
+                    },
+                    colors: {
+                        primary: '#FF6347', 
+                        secondary: '#FFD700',
+                        accent: '#4682B4', 
+                        background: '#FFF8DC',
+                        textDark: '#333333',
+                        textLight: '#FFFFFF',
+                        clockBg: '#E0E0E0',
+                        clockBorder: '#B0B0B0',
+                        hourHandColor: '#2c3e50', // Dark Slate Gray - More distinct
+                        minuteHandColor: '#e67e22', // Carrot Orange - More distinct
+                        secondHandColor: '#c0392b', // Pomegranate Red - More distinct
+                        digitalBg: '#1F2937', // Darker, more modern digital background (Tailwind gray-800)
+                        digitalFg: '#2ECC71', // Emerald Green - Brighter digital numbers
+                        navBg: '#374151', // Tailwind gray-700 (slightly lighter than digitalBg for contrast)
+                        navHoverBg: '#1F2937' // Tailwind gray-800 (matches digitalBg)
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background font-inter text-textDark min-h-screen flex flex-col items-center p-4 selection:bg-primary selection:text-white">
+
+    <nav class="app-header bg-accent text-white w-full max-w-4xl mx-auto rounded-t-xl p-3 shadow-lg flex justify-between items-center mb-0 print:hidden">
+        <a href="{{ url_for('homepage') }}" class="text-lg hover:underline font-fredoka">&larr; Vivi's Learning Corner</a>
+        <div class="other-games-menu relative">
+            <button id="other-games-button" aria-haspopup="true" aria-expanded="false" class="font-fredoka text-lg hover:underline focus:outline-none focus:ring-2 focus:ring-white rounded">Other Games &darr;</button>
+            <div id="other-games-dropdown" class="dropdown-content absolute right-0 mt-2 w-52 bg-navBg rounded-md shadow-xl z-20 hidden" role="menu">
+                {% for game in all_games %}
+                    {% if game.key != current_game_key %}
+                        <a href="{{ url_for(game.url_func_name) }}" class="block px-4 py-3 text-sm text-white hover:bg-navHoverBg" role="menuitem">{{ game.name }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="bg-white shadow-2xl rounded-b-xl p-6 md:p-10 w-full max-w-3xl mt-0">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-fredoka text-primary mt-2">Time Explorers!</h1>
+            <p class="text-lg text-gray-600 mt-2">Let's learn to read clocks!</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <section class="flex flex-col items-center">
+                <h2 class="text-2xl font-fredoka text-accent mb-4">Analog Clock</h2>
+                <div id="analog-clock-container" class="w-64 h-64 md:w-80 md:h-80 bg-clockBg rounded-full shadow-inner border-4 border-clockBorder relative cursor-pointer select-none">
+                    <svg id="analog-clock-svg" viewBox="0 0 200 200" class="w-full h-full">
+                        <circle cx="100" cy="100" r="95" fill="none" stroke="#888" stroke-width="1"/>
+                        <line id="hour-hand" x1="100" y1="100" x2="100" y2="65" stroke-width="8" stroke-linecap="round" class="stroke-hourHandColor"/>
+                        <line id="minute-hand" x1="100" y1="100" x2="100" y2="45" stroke-width="5" stroke-linecap="round" class="stroke-minuteHandColor"/>
+                        <line id="second-hand" x1="100" y1="100" x2="100" y2="35" stroke-width="2" stroke-linecap="round" class="stroke-secondHandColor"/>
+                        <circle cx="100" cy="100" r="5" class="fill-textDark"/> 
+                    </svg>
+                </div>
+                <p class="text-sm text-gray-500 mt-2">Drag the hands or click the digital time below to set!</p>
+            </section>
+
+            <section class="flex flex-col items-center">
+                <h2 class="text-2xl font-fredoka text-accent mb-4">Digital Clock</h2>
+                <div id="digital-clock-display-wrapper" class="w-full max-w-xs sm:max-w-sm"> 
+                    <div id="digital-clock-display" class="digital-clock-interactive bg-digitalBg text-digitalFg font-orbitron py-3 px-1 rounded-lg shadow-inner w-full text-center flex justify-between items-center">
+                        <span id="digital-hour" class="digital-segment" data-unit="hour" tabindex="0">12</span>
+                        <span class="digital-colon">:</span>
+                        <span id="digital-minute" class="digital-segment" data-unit="minute" tabindex="0">00</span>
+                        <span class="digital-colon">:</span>
+                        <span id="digital-second" class="digital-segment" data-unit="second" tabindex="0">00</span>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-500 mt-2">Click on hours, minutes, or seconds to change them.</p>
+            </section>
+        </div>
+        <div id="message-box" class="fixed top-5 right-5 bg-accent text-white p-3 rounded-lg shadow-lg hidden opacity-0 transition-opacity duration-500 z-50">
+            Time updated!
+        </div>
+
+        <footer class="mt-10 text-center text-gray-500 text-sm">
+            <p>Keep practicing, time wizard!</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='clocks_script.js') }}"></script>
+    </body>
+</html>
+
