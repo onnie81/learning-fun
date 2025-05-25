@@ -1,0 +1,72 @@
+/* static/style.css */
+
+/* General body styles (can complement Tailwind) */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Pizza Slice Styling */
+.pizza-slice {
+    stroke: #FFF8DC; /* Cornsilk - color of crust/separators */
+    stroke-width: 2;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.pizza-slice.filled {
+    fill: #FF6347; /* Tomato - primary color for filled slices */
+    opacity: 1;
+}
+
+.pizza-slice.empty {
+    fill: #FFD700; /* Gold - secondary color for empty slices */
+    opacity: 0.7;
+}
+
+/* Line Segment Styling */
+.line-segment {
+    height: 100%;
+    border-right: 2px solid #FFF8DC; /* Cornsilk - separator */
+    transition: background-color 0.3s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem; /* Smaller font for numbers inside segments if needed */
+}
+.line-segment:last-child {
+    border-right: none;
+}
+
+.line-segment.filled {
+    background-color: #FF6347; /* Tomato */
+}
+
+.line-segment.empty {
+    background-color: #FFD700; /* Gold */
+    opacity: 0.7;
+}
+
+/* Input number spinners - hide for a cleaner look on some browsers */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield; /* Firefox */
+}
+
+/* Custom focus ring to match theme */
+input:focus {
+  border-color: var(--primary-color, #FF6347) !important; /* Use CSS variable or fallback */
+  box-shadow: 0 0 0 3px rgba(255, 99, 71, 0.3) !important; /* primary color with opacity */
+}
+
+/* Style for the SVG container to ensure it doesn't overflow weirdly */
+#pizza-container svg {
+    display: block; /* Prevents extra space below SVG */
+    margin: auto; /* Center the SVG if its max-width is hit */
+}
+
+
