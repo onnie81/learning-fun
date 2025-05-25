@@ -1,72 +1,149 @@
 /* static/style.css */
 
-/* General body styles (can complement Tailwind) */
 body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Stacked Fraction Input Styling */
+.fraction-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100px; /* Adjust as needed */
+}
+.fraction-input {
+    width: 100%;
+    padding: 0.5rem;
+    text-align: center;
+    border: 1px solid #D1D5DB; /* Tailwind gray-300 */
+    border-radius: 0.375rem; /* Tailwind rounded-md */
+    font-size: 1.125rem; /* Tailwind text-lg */
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* Tailwind shadow-sm */
+}
+.fraction-input.numerator {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-bottom: -1px; /* Overlap border slightly */
+}
+.fraction-input.denominator {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+.fraction-line {
+    width: 80%;
+    height: 2px;
+    background-color: #333333; /* textDark */
+    margin: 2px 0;
+}
+/* Focus styling for inputs */
+#numerator1:focus, #denominator1:focus {
+    border-color: #FF6347; /* primary */
+    box-shadow: 0 0 0 3px rgba(255, 99, 71, 0.3);
+    z-index: 1; /* Bring focused input to front */
+}
+#numerator2:focus, #denominator2:focus {
+    border-color: #32CD32; /* fractionTwo */
+    box-shadow: 0 0 0 3px rgba(50, 205, 50, 0.3);
+    z-index: 1;
+}
+
+
 /* Pizza Slice Styling */
 .pizza-slice {
     stroke: #FFF8DC; /* Cornsilk - color of crust/separators */
     stroke-width: 2;
-    transition: opacity 0.3s ease-in-out;
+    transition: fill 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }
-
-.pizza-slice.filled {
-    fill: #FF6347; /* Tomato - primary color for filled slices */
+.pizza-slice.filled-f1 {
+    fill: #FF6347; /* Tomato - primary color for fraction 1 */
     opacity: 1;
 }
-
-.pizza-slice.empty {
-    fill: #FFD700; /* Gold - secondary color for empty slices */
+.pizza-slice.empty-f1 {
+    fill: #FFD700; /* Gold - secondary color for empty slices for F1 */
     opacity: 0.7;
 }
 
-/* Line Segment Styling */
-.line-segment {
-    height: 100%;
-    border-right: 2px solid #FFF8DC; /* Cornsilk - separator */
+/* Fraction 2 Pizza specific */
+.pizza-slice-f2 {
+    stroke-dasharray: 4, 2; /* Dotted line for F2 separators */
+    fill-opacity: 0.6; /* Semi-transparent fill for F2 */
+}
+.pizza-slice-f2.filled-f2 {
+    fill: #32CD32; /* LimeGreen - color for fraction 2 */
+    /* fill-opacity is inherited or can be set again if needed */
+}
+.pizza-slice-f2.empty-f2 {
+    fill: #FFD700; /* Gold - for empty F2 parts, also semi-transparent */
+    opacity: 0.3; /* Make empty F2 parts even more subtle */
+}
+
+
+/* Rectangle Segment Styling */
+.rectangle-grid { /* New container for each fraction's grid in the rectangle */
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    padding: inherit; /* Inherit padding from parent for alignment */
+}
+.rectangle-row {
+    display: flex;
+    width: 100%;
+    flex-grow: 1; /* Rows share height equally */
+}
+.rectangle-segment {
+    flex-grow: 1; /* Segments share width equally in a row */
+    border: 1px solid #FFF8DC; /* Cornsilk - separator */
     transition: background-color 0.3s ease-in-out;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 0.8rem; /* Smaller font for numbers inside segments if needed */
-}
-.line-segment:last-child {
-    border-right: none;
+    font-size: 0.7rem;
+    box-sizing: border-box;
 }
 
-.line-segment.filled {
+.rectangle-segment.filled-f1 {
     background-color: #FF6347; /* Tomato */
 }
-
-.line-segment.empty {
+.rectangle-segment.empty-f1 {
     background-color: #FFD700; /* Gold */
     opacity: 0.7;
 }
 
-/* Input number spinners - hide for a cleaner look on some browsers */
+/* Fraction 2 Rectangle specific */
+.rectangle-segment-f2 {
+    border-style: dashed !important; /* Dotted/dashed border */
+    border-width: 1px !important;
+    border-color: #32CD32 !important; /* Use F2 color for border */
+}
+.rectangle-segment-f2.filled-f2 {
+    background-color: rgba(50, 205, 50, 0.6); /* fractionTwoFill from Tailwind config */
+}
+.rectangle-segment-f2.empty-f2 {
+    background-color: rgba(255, 215, 0, 0.3); /* Gold, more transparent */
+}
+
+
+/* Number Line Styling (mostly unchanged) */
+#number-line-svg .line-path { stroke: #333333; stroke-width: 2; }
+#number-line-svg .tick-major { stroke: #333333; stroke-width: 2; }
+#number-line-svg .tick-minor { stroke: #aaaaaa; stroke-width: 1; }
+#number-line-svg .marker-f1 { fill: #FF6347; stroke: #FFF8DC; stroke-width: 1; }
+#number-line-svg .marker-f2 { fill: #32CD32; stroke: #FFF8DC; stroke-width: 1; }
+#number-line-svg .label-f1 { fill: #FF6347; font-size: 10px; font-family: 'Inter', sans-serif; text-anchor: middle; }
+#number-line-svg .label-f2 { fill: #32CD32; font-size: 10px; font-family: 'Inter', sans-serif; text-anchor: middle; }
+#number-line-svg .label-axis { fill: #333333; font-size: 12px; font-family: 'Inter', sans-serif; text-anchor: middle; }
+
+
+/* Input number spinners */
 input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-input[type=number] {
-  -moz-appearance: textfield; /* Firefox */
-}
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
 
-/* Custom focus ring to match theme */
-input:focus {
-  border-color: var(--primary-color, #FF6347) !important; /* Use CSS variable or fallback */
-  box-shadow: 0 0 0 3px rgba(255, 99, 71, 0.3) !important; /* primary color with opacity */
+#pizza-container svg { /* Ensure SVGs in pizza container overlay correctly */
+    display: block;
+    margin: auto;
 }
-
-/* Style for the SVG container to ensure it doesn't overflow weirdly */
-#pizza-container svg {
-    display: block; /* Prevents extra space below SVG */
-    margin: auto; /* Center the SVG if its max-width is hit */
-}
-
 
