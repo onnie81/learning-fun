@@ -71,7 +71,6 @@ body {
 }
 .pizza-slice-f2.filled-f2 {
     fill: #32CD32; /* LimeGreen - color for fraction 2 */
-    /* fill-opacity is inherited or can be set again if needed */
 }
 .pizza-slice-f2.empty-f2 {
     fill: #FFD700; /* Gold - for empty F2 parts, also semi-transparent */
@@ -80,17 +79,16 @@ body {
 
 
 /* Rectangle Segment Styling */
-.rectangle-grid { /* New container for each fraction's grid in the rectangle */
+.rectangle-grid { /* Container for each fraction's grid */
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0; left: 0; width: 100%; height: 100%; /* Fill parent's content area */
     display: flex;
     flex-direction: column;
-    padding: inherit; /* Inherit padding from parent for alignment */
 }
 .rectangle-row {
     display: flex;
     width: 100%;
-    flex-grow: 1; /* Rows share height equally */
+    flex-grow: 1; /* Rows share height equally within their grid */
 }
 .rectangle-segment {
     flex-grow: 1; /* Segments share width equally in a row */
@@ -114,9 +112,9 @@ body {
 
 /* Fraction 2 Rectangle specific */
 .rectangle-segment-f2 {
-    border-style: dashed !important; /* Dotted/dashed border */
+    border-style: dashed !important;
     border-width: 1px !important;
-    border-color: #32CD32 !important; /* Use F2 color for border */
+    border-color: #32CD32 !important;
 }
 .rectangle-segment-f2.filled-f2 {
     background-color: rgba(50, 205, 50, 0.6); /* fractionTwoFill from Tailwind config */
@@ -126,7 +124,7 @@ body {
 }
 
 
-/* Number Line Styling (mostly unchanged) */
+/* Number Line Styling */
 #number-line-svg .line-path { stroke: #333333; stroke-width: 2; }
 #number-line-svg .tick-major { stroke: #333333; stroke-width: 2; }
 #number-line-svg .tick-minor { stroke: #aaaaaa; stroke-width: 1; }
@@ -137,12 +135,11 @@ body {
 #number-line-svg .label-axis { fill: #333333; font-size: 12px; font-family: 'Inter', sans-serif; text-anchor: middle; }
 
 
-/* Input number spinners */
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; }
 
-#pizza-container svg { /* Ensure SVGs in pizza container overlay correctly */
+#pizza-container svg {
     display: block;
     margin: auto;
 }
