@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let intervalId = null; 
     let clockState = { hours: 0, minutes: 0, seconds: 0, mode: 'live' };
     let activeInput = null; 
-    let currentlyHoveredHandElement = null; // To track which hand element is hovered
+    let currentlyHoveredHandElement = null;
 
     function updateDisplays(h, m, s) {
         const secondDeg = s * 6;
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         originalSegment.classList.remove('editing');
         startClockTicking(); 
     }
-    
+
     function getAngleFromPoint(event) {
         const rect = analogClockSVG.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
@@ -171,8 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return angle;
     }
 
-    // --- Analog Hand Hover and Drag Logic ---
-    const HAND_HIT_TOLERANCE = 15; // Degrees tolerance for selecting a hand
+    const HAND_HIT_TOLERANCE = 15; 
 
     function getHandNearAngle(targetAngle) {
         const currentHourAngle = (((clockState.hours % 12) * 30) + (clockState.minutes * 0.5) + (clockState.seconds * (0.5/60))) % 360;
@@ -181,19 +180,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const diffAngle = (a1, a2) => {
             let diff = Math.abs(a1 - a2);
-            return Math.min(diff, 360 - diff); // Consider shortest distance around circle
+            return Math.min(diff, 360 - diff); 
         };
 
+        // Check in order of "thinnest" or "hardest to hit" visually, or by typical interaction desire
         if (diffAngle(targetAngle, currentSecondAngle) <= HAND_HIT_TOLERANCE) return secondHand;
         if (diffAngle(targetAngle, currentMinuteAngle) <= HAND_HIT_TOLERANCE) return minuteHand;
-        if (diffAngle(targetAngle, currentHourAngle) <= HAND_HIT_TOLERANCE) return hourHand;
+        if (diffAngle(targetAngle, currentHourAngle) <= HAND_HIT_TOLERANCE) return hourHand; // Hour hand is thickest, check last
         return null;
     }
     
     function clearAllHandHovers() {
-        hourHand.classList.remove('hand-hover-active');
-        minuteHand.classList.remove('hand-hover-active');
-        secondHand.classList.remove('hand-hover-active');
+        hourHand.classList.remove('hand-hover-active', 'hand-hoverable');
+        minuteHand.classList.remove('hand-hover-active', 'hand-hoverable');
+        secondHand.classList.remove('hand-hover-active', 'hand-hoverable');
         digitalHourSegment.classList.remove('analog-hover-highlight');
         digitalMinuteSegment.classList.remove('analog-hover-highlight');
         digitalSecondSegment.classList.remove('analog-hover-highlight');
@@ -201,18 +201,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     clockContainer.addEventListener('mousemove', (event) => {
-        if (draggingHand || activeInput) { // Don't show hover if dragging or editing digital
-            clearAllHandHovers();
+        if (draggingHand || activeInput) { 
+            if(!draggingHand) clearAllHandHovers(); // Clear hover if editing digital, but not if dragging
             return;
         }
         const angle = getAngleFromPoint(event);
         const handElement = getHandNearAngle(angle);
 
         if (handElement !== currentlyHoveredHandElement) {
-            clearAllHandHovers(); // Clear previous hover
+            clearAllHandHovers(); 
             if (handElement) {
                 handElement.classList.add('hand-hover-active');
-                handElement.classList.add('hand-hoverable'); // For cursor style
+                handElement.classList.add('hand-hoverable');
                 currentlyHoveredHandElement = handElement;
                 if (handElement === hourHand) digitalHourSegment.classList.add('analog-hover-highlight');
                 else if (handElement === minuteHand) digitalMinuteSegment.classList.add('analog-hover-highlight');
@@ -222,14 +222,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     clockContainer.addEventListener('mouseleave', () => {
-        if (!draggingHand) { // Only clear if not actively dragging
+        if (!draggingHand) { 
             clearAllHandHovers();
-             hourHand.classList.remove('hand-hoverable');
-             minuteHand.classList.remove('hand-hoverable');
-             secondHand.classList.remove('hand-hoverable');
         }
     });
-
 
     function startDrag(event) {
         event.preventDefault();
@@ -238,15 +234,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const angle = getAngleFromPoint(event);
         const handToDrag = getHandNearAngle(angle);
 
-        if (!handToDrag) return; // No hand close enough to drag
+        if (!handToDrag) return; 
 
-        draggingHand = handToDrag.id.split('-')[0]; // 'hour', 'minute', or 'second'
+        draggingHand = handToDrag.id.split('-')[0]; 
         
         clockState.mode = 'manual'; 
         if (intervalId) clearInterval(intervalId); 
 
-        // Clear hover highlights, apply dragging highlight
-        clearAllHandHovers();
+        clearAllHandHovers(); // Clear hover highlights
+        // Apply dragging highlight
         if (draggingHand === 'hour') hourHand.classList.add('hand-dragging');
         else if (draggingHand === 'minute') minuteHand.classList.add('hand-dragging');
         else if (draggingHand === 'second') secondHand.classList.add('hand-dragging');
@@ -268,14 +264,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (draggingHand === 'minute') {
             m = Math.round(angle / 6) % 60;
             if (m < 0) m += 60;
-            s = 0; // Optionally reset seconds when minute is dragged
+            s = 0; 
         } else if (draggingHand === 'hour') {
             let hourValueFromAngle = (angle / 30); 
             let newH = Math.floor(hourValueFromAngle % 12); 
             if (newH === 0) newH = 12; 
             if (h >= 12) { if (newH !== 12) h = newH + 12; else h = 12; } 
             else { if (newH === 12) h = 0; else h = newH; }
-            m = 0; // Optionally reset minutes and seconds when hour is dragged
+            m = 0; 
             s = 0;
         } else if (draggingHand === 'second') {
             s = Math.round(angle / 6) % 60;
@@ -292,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (draggingHand === 'second') secondHand.classList.remove('hand-dragging');
         }
         draggingHand = null;
-        startClockTicking(); // Resume ticking after drag
+        startClockTicking(); 
         document.removeEventListener('mousemove', onDrag);
         document.removeEventListener('mouseup', endDrag);
         document.removeEventListener('touchmove', onDrag);
@@ -322,7 +318,8 @@ document.addEventListener('DOMContentLoaded', () => {
             textEl.setAttribute('x', String(100 + r * Math.cos(angleRad)));
             textEl.setAttribute('y', String(100 + r * Math.sin(angleRad) + 4)); 
             textEl.setAttribute('text-anchor', 'middle');
-            textEl.setAttribute('font-family', 'Inter', sans-serif');
+            // Line 325 in my previous count was here. Checked for syntax.
+            textEl.setAttribute('font-family', 'Inter, sans-serif'); 
             textEl.setAttribute('font-size', '12');
             textEl.setAttribute('fill', '#333');
             textEl.textContent = i;
@@ -350,8 +347,9 @@ document.addEventListener('DOMContentLoaded', () => {
             otherGamesButton.setAttribute('aria-expanded', 'true');
         });
         menuArea.addEventListener('mouseleave', (event) => {
-            // Check if the mouse is leaving to an element outside the menuArea
-            if (!menuArea.contains(event.relatedTarget)) {
+            if (!menuArea.contains(event.relatedTarget) && // Check if focus has not moved to a child of menuArea
+                document.activeElement !== otherGamesButton && // Check if button itself is not focused
+                !otherGamesDropdown.contains(document.activeElement)) { // Check if dropdown is not focused
                 otherGamesDropdown.classList.add('hidden');
                 otherGamesButton.setAttribute('aria-expanded', 'false');
             }
@@ -360,9 +358,10 @@ document.addEventListener('DOMContentLoaded', () => {
             otherGamesDropdown.classList.remove('hidden');
             otherGamesButton.setAttribute('aria-expanded', 'true');
         });
-        // For keyboard navigation: if focus moves away from the button AND the dropdown, hide it.
-        menuArea.addEventListener('focusout', (event) => {
-            if (!menuArea.contains(event.relatedTarget)) {
+        
+        otherGamesDropdown.addEventListener('focusout', (event) => { 
+            // If focus moves to something outside the entire menu area (button + dropdown)
+            if (!menuArea.contains(event.relatedTarget)) { 
                 otherGamesDropdown.classList.add('hidden');
                 otherGamesButton.setAttribute('aria-expanded', 'false');
             }

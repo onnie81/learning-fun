@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writing Helper - Vivi's Learning Corner</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@400;600&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'fredoka': ['"Fredoka One"', 'cursive'],
+                        'inter': ['Inter', 'sans-serif'],
+                        'lexend': ['"Lexend"', 'sans-serif'] 
+                    },
+                    colors: {
+                        primary: '#FF6347', 
+                        secondary: '#FFD700',
+                        accent: '#4682B4', 
+                        background: '#FFF8DC',
+                        textDark: '#333333',
+                        textLight: '#FFFFFF',
+                        navBg: '#4A5568', // Adjusted to a neutral dark gray
+                        navHoverBg: '#2D3748', // Adjusted to a darker gray
+                        bubbleRed: '#FECACA', 
+                        bubbleRedText: '#991B1B', 
+                        bubbleBlue: '#BFDBFE', 
+                        bubbleBlueText: '#1E40AF', 
+                        bubbleGreen: '#A7F3D0', 
+                        bubbleGreenText: '#065F46', 
+                        bubbleYellow: '#FDE68A', 
+                        bubbleYellowText: '#92400E', 
+                        bubblePurple: '#DDD6FE', 
+                        bubblePurpleText: '#5B21B6', 
+                        switchBg: '#D1D5DB', 
+                        switchHandle: '#FFFFFF', 
+                        switchActiveBg: '#34D399', 
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background font-inter text-textDark min-h-screen flex flex-col items-center p-4 selection:bg-primary selection:text-white">
+
+    <nav class="app-header bg-accent text-white w-full max-w-4xl mx-auto rounded-t-xl p-3 shadow-lg flex justify-between items-center mb-0 print:hidden">
+        <a href="{{ url_for('homepage') }}" class="text-lg hover:underline font-fredoka">&larr; Vivi's Learning Corner</a>
+        <div class="other-games-menu relative">
+            <button id="other-games-button" aria-haspopup="true" aria-expanded="false" class="font-fredoka text-lg hover:underline focus:outline-none focus:ring-2 focus:ring-white rounded">Other Games &darr;</button>
+            <div id="other-games-dropdown" class="dropdown-content absolute right-0 mt-2 w-52 bg-navBg rounded-md shadow-xl z-20 hidden" role="menu">
+                {% for game in all_games %}
+                    {% if game.key != current_game_key %}
+                        <a href="{{ url_for(game.url_func_name) }}" class="block px-4 py-3 text-sm text-white hover:bg-navHoverBg" role="menuitem">{{ game.name }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="bg-white shadow-2xl rounded-b-xl p-6 md:p-10 w-full max-w-4xl mt-0">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-fredoka text-primary">Vivi's Writing Helper!</h1>
+            <p class="text-lg text-gray-600 mt-2">Let's turn your ideas into a story or a plan!</p>
+        </header>
+
+        <section class="mb-8 p-6 bg-secondary/10 rounded-lg shadow">
+            <h2 class="text-2xl font-fredoka text-accent mb-4 text-center">Settings</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                <div>
+                    <label for="writer-age" class="block text-sm font-medium text-gray-700 mb-1">Your Age:</label>
+                    <select id="writer-age" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary p-3 text-lg font-inter">
+                        <option value="7">7 years old</option>
+                        <option value="8">8 years old</option>
+                        <option value="9" selected>9 years old (3rd Grade)</option>
+                        <option value="10">10 years old</option>
+                        <option value="11">11 years old</option>
+                        <option value="12">12 years old</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="word-count" class="block text-sm font-medium text-gray-700 mb-1">Output Length:</label>
+                    <select id="word-count" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary p-3 text-lg font-inter">
+                        <option value="50">Short (~3-4 sentences)</option>
+                        <option value="100" selected>Medium (~5-7 sentences)</option>
+                        <option value="150">Long (~8-10 sentences)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="language-select" class="block text-sm font-medium text-gray-700 mb-1">Language:</label>
+                    <select id="language-select" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary p-3 text-lg font-inter">
+                        <option value="English" selected>English</option>
+                        <option value="Spanish">Español</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-6 p-4 bg-accent/10 rounded-lg shadow flex flex-col sm:flex-row justify-center items-center gap-x-6 gap-y-3">
+            <span class="font-semibold text-accent text-lg whitespace-nowrap">I want help to:</span>
+            <div class="flex items-center space-x-3">
+                <span id="mode-label-plan" class="text-gray-700 font-medium">Make a Plan</span>
+                <button type="button" id="mode-switch" class="relative inline-flex flex-shrink-0 h-7 w-14 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary bg-switchBg" role="switch" aria-checked="true">
+                    <span class="sr-only">Switch mode</span>
+                    <span aria-hidden="true" id="mode-switch-handle" class="pointer-events-none inline-block h-6 w-6 rounded-full bg-switchHandle shadow transform ring-0 transition ease-in-out duration-200 translate-x-7"></span> </button>
+                <span id="mode-label-story" class="text-primary font-bold">Write My Story</span>
+            </div>
+        </section>
+
+        <section class="mb-8 p-6 bg-primary/10 rounded-lg shadow">
+            <h2 class="text-2xl font-fredoka text-accent mb-4 text-center">Your Ideas</h2>
+            <p class="text-center text-sm text-gray-600 mb-3">What is your homework about? Or what do you want to write about?</p>
+            <div class="flex items-center gap-3">
+                <input type="text" id="idea-input" placeholder="Type an idea here (e.g., 'my summer vacation', 'a cat that can fly')..." class="flex-grow mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary p-3 text-lg font-inter">
+                <button id="add-idea-button" class="bg-primary hover:bg-red-700 text-white font-fredoka py-3 px-6 rounded-lg shadow-md text-lg whitespace-nowrap">Add Idea</button>
+            </div>
+        </section>
+        
+        <div id="ideas-list-container" class="mb-8 p-4 min-h-[100px] bg-gray-50 rounded-lg shadow-inner flex flex-wrap gap-3 items-start content-start">
+            <p id="no-ideas-message" class="text-gray-400 italic w-full text-center p-4">Add some ideas to get started!</p>
+        </div>
+
+        <div class="text-center my-6">
+            <button id="generate-content-button" class="bg-accent hover:bg-blue-700 text-white font-fredoka text-2xl py-4 px-8 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
+                Write My Story!
+            </button>
+        </div>
+
+        <section id="output-section" class="hidden mt-8 p-6 bg-green-50 rounded-lg shadow">
+            <h2 id="output-title" class="text-2xl font-fredoka text-green-700 mb-4 text-center">Your Story!</h2>
+            <div id="loading-indicator" class="hidden text-center my-4">
+                <svg class="animate-spin h-8 w-8 text-accent mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="text-accent font-semibold mt-2">Working on it...</p>
+            </div>
+            <div id="generated-content" class="font-lexend text-xl md:text-2xl leading-relaxed text-textDark p-4 bg-white rounded shadow min-h-[150px]">
+            </div>
+            <div id="error-message" class="hidden text-red-600 bg-red-100 p-3 rounded-md mt-4 text-center"></div>
+        </section>
+
+    </div>
+    <script src="{{ url_for('static', filename='writing_helper_script.js') }}"></script>
+    <script>
+        const otherGamesButton = document.getElementById('other-games-button');
+        const otherGamesDropdown = document.getElementById('other-games-dropdown');
+        if (otherGamesButton && otherGamesDropdown) {
+            const menuArea = otherGamesButton.parentElement; 
+            menuArea.addEventListener('mouseenter', () => { otherGamesDropdown.classList.remove('hidden'); otherGamesButton.setAttribute('aria-expanded', 'true'); });
+            menuArea.addEventListener('mouseleave', (event) => { if (!menuArea.contains(event.relatedTarget) && document.activeElement !== otherGamesButton && !otherGamesDropdown.contains(document.activeElement)) { otherGamesDropdown.classList.add('hidden'); otherGamesButton.setAttribute('aria-expanded', 'false'); } });
+            otherGamesButton.addEventListener('focus', () => { otherGamesDropdown.classList.remove('hidden'); otherGamesButton.setAttribute('aria-expanded', 'true'); });
+            otherGamesDropdown.addEventListener('focusin', () => { otherGamesDropdown.classList.remove('hidden'); });
+            otherGamesDropdown.addEventListener('focusout', (event) => { if (!menuArea.contains(event.relatedTarget)) { otherGamesDropdown.classList.add('hidden'); otherGamesButton.setAttribute('aria-expanded', 'false'); } });
+            otherGamesButton.addEventListener('click', (event) => { event.stopPropagation(); const isHidden = otherGamesDropdown.classList.toggle('hidden'); otherGamesButton.setAttribute('aria-expanded', String(!isHidden)); });
+            document.addEventListener('click', (event) => { if (menuArea && !menuArea.contains(event.target)) { otherGamesDropdown.classList.add('hidden'); otherGamesButton.setAttribute('aria-expanded', 'false'); } });
+        }
+    </script>
+</body>
+</html>
+
