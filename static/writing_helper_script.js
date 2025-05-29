@@ -12,11 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const modeSwitchHandle = document.getElementById('mode-switch-handle');
     const modeLabelPlan = document.getElementById('mode-label-plan');
     const modeLabelStory = document.getElementById('mode-label-story');
-    const generateContentButton = document.getElementById('generate-content-button'); // Renamed button ID
+    const generateContentButton = document.getElementById('generate-content-button'); 
     
-    const outputSection = document.getElementById('output-section'); // Renamed for clarity
-    const outputTitle = document.getElementById('output-title'); // New element for dynamic title
-    const generatedContentDiv = document.getElementById('generated-content'); // Renamed for clarity
+    const outputSection = document.getElementById('output-section'); 
+    const outputTitle = document.getElementById('output-title'); 
+    const generatedContentDiv = document.getElementById('generated-content'); 
     const loadingIndicator = document.getElementById('loading-indicator');
     const errorMessageDiv = document.getElementById('error-message');
 
@@ -29,21 +29,125 @@ document.addEventListener('DOMContentLoaded', () => {
         { bg: 'bg-bubblePurple', text: 'text-bubblePurpleText' },
     ];
     let nextColorIndex = 0;
-    let currentWriterMode = 'story'; // 'story' or 'plan'
+    let currentWriterMode = 'story'; 
+
+    let cachedContent = { 
+        plan: null, 
+        story: null, 
+        ideasSnapshot: null, 
+        settingsSnapshot: null 
+    };
+
+    // --- localStorage Keys ---
+    const LS_IDEAS_KEY = 'writingHelper_ideas';
+    const LS_MODE_KEY = 'writingHelper_mode';
+    const LS_SETTINGS_KEY = 'writingHelper_settings';
+    const LS_CACHED_CONTENT_KEY = 'writingHelper_cachedContent';
+    const LS_NEXT_COLOR_INDEX_KEY = 'writingHelper_nextColorIndex';
+
+    // --- Load from localStorage ---
+    function loadState() {
+        const storedIdeas = localStorage.getItem(LS_IDEAS_KEY);
+        if (storedIdeas) {
+            ideas = JSON.parse(storedIdeas);
+        }
+
+        const storedMode = localStorage.getItem(LS_MODE_KEY);
+        if (storedMode) {
+            currentWriterMode = storedMode;
+        }
+
+        const storedSettings = localStorage.getItem(LS_SETTINGS_KEY);
+        if (storedSettings) {
+            const settings = JSON.parse(storedSettings);
+            writerAgeSelect.value = settings.age || '9';
+            wordCountSelect.value = settings.wordCount || '100';
+            languageSelect.value = settings.language || 'English';
+        }
+
+        const storedCachedContent = localStorage.getItem(LS_CACHED_CONTENT_KEY);
+        if (storedCachedContent) {
+            cachedContent = JSON.parse(storedCachedContent);
+        }
+        
+        const storedColorIndex = localStorage.getItem(LS_NEXT_COLOR_INDEX_KEY);
+        if (storedColorIndex) {
+            nextColorIndex = parseInt(storedColorIndex, 10);
+        }
+    }
+
+    // --- Save to localStorage ---
+    function saveIdeas() {
+        localStorage.setItem(LS_IDEAS_KEY, JSON.stringify(ideas));
+        localStorage.setItem(LS_NEXT_COLOR_INDEX_KEY, nextColorIndex.toString());
+    }
+
+    function saveMode() {
+        localStorage.setItem(LS_MODE_KEY, currentWriterMode);
+    }
+
+    function saveSettings() {
+        const settings = {
+            age: writerAgeSelect.value,
+            wordCount: wordCountSelect.value,
+            language: languageSelect.value
+        };
+        localStorage.setItem(LS_SETTINGS_KEY, JSON.stringify(settings));
+    }
+
+    function saveCachedContent() {
+        localStorage.setItem(LS_CACHED_CONTENT_KEY, JSON.stringify(cachedContent));
+    }
+
+
+    function getSettingsSnapshot() { 
+        const age = writerAgeSelect.value;
+        const language = languageSelect.value;
+        const wordCount = wordCountSelect.value; 
+        return JSON.stringify({ age, wordCount, language });
+    }
+
+    function ideasToStringSnapshot(currentIdeas) {
+        return JSON.stringify(currentIdeas.map(idea => idea.text).sort());
+    }
+
+    function displayCachedContent() {
+        const currentIdeasSnap = ideasToStringSnapshot(ideas);
+        const currentSettingsSnap = getSettingsSnapshot();
+
+        if (cachedContent.ideasSnapshot === currentIdeasSnap && cachedContent.settingsSnapshot === currentSettingsSnap) {
+            if (currentWriterMode === 'story' && cachedContent.story) {
+                generatedContentDiv.textContent = cachedContent.story;
+                outputSection.classList.remove('hidden');
+                return true;
+            } else if (currentWriterMode === 'plan' && cachedContent.plan) {
+                generatedContentDiv.innerHTML = cachedContent.plan; 
+                outputSection.classList.remove('hidden');
+                return true;
+            }
+        }
+        generatedContentDiv.innerHTML = '';
+        if (ideas.length > 0) { 
+             outputSection.classList.add('hidden');
+        } else {
+            outputSection.classList.add('hidden'); // Ensure it's hidden if no ideas either
+        }
+        return false; 
+    }
 
     function updateModeUI() {
         if (currentWriterMode === 'story') {
             modeSwitchButton.classList.remove('bg-switchBg');
-            modeSwitchButton.classList.add('bg-switchActiveBg'); // Assuming green for story mode
+            modeSwitchButton.classList.add('bg-switchActiveBg');
             modeSwitchHandle.classList.remove('translate-x-0');
-            modeSwitchHandle.classList.add('translate-x-7'); // Or whatever the translate for "on" is
+            modeSwitchHandle.classList.add('translate-x-7');
             modeSwitchButton.setAttribute('aria-checked', 'true');
             modeLabelStory.classList.add('font-bold', 'text-primary');
             modeLabelPlan.classList.remove('font-bold', 'text-primary');
             modeLabelPlan.classList.add('text-gray-700');
-            generateContentButton.textContent = 'Write My Story!';
+            generateContentButton.textContent = 'Write My Story!'; 
             outputTitle.textContent = 'Your Story!';
-        } else { // plan mode
+        } else { 
             modeSwitchButton.classList.remove('bg-switchActiveBg');
             modeSwitchButton.classList.add('bg-switchBg');
             modeSwitchHandle.classList.remove('translate-x-7');
@@ -52,20 +156,35 @@ document.addEventListener('DOMContentLoaded', () => {
             modeLabelPlan.classList.add('font-bold', 'text-primary');
             modeLabelStory.classList.remove('font-bold', 'text-primary');
             modeLabelStory.classList.add('text-gray-700');
-            generateContentButton.textContent = 'Get My Plan!';
+            generateContentButton.textContent = 'Get My Plan!'; 
             outputTitle.textContent = 'Your Writing Plan!';
         }
-        // Clear previous output when mode changes
-        generatedContentDiv.innerHTML = ''; // Use innerHTML if guidelines might have HTML structure
+        
+        displayCachedContent(); 
         errorMessageDiv.classList.add('hidden');
-        if (ideas.length > 0) { // Only hide main output section if it was visible
-             // outputSection.classList.add('hidden'); // Optionally hide section until new generation
-        }
+        saveMode(); // Save mode when UI updates
     }
 
     modeSwitchButton.addEventListener('click', () => {
         currentWriterMode = (currentWriterMode === 'story') ? 'plan' : 'story';
         updateModeUI();
+    });
+
+    function invalidateCacheAndSave() { 
+        cachedContent = { plan: null, story: null, ideasSnapshot: null, settingsSnapshot: null };
+        saveCachedContent(); // Save the invalidated cache
+        generatedContentDiv.innerHTML = '';
+        if (ideas.length > 0) {
+            outputSection.classList.add('hidden');
+        }
+    }
+    
+    [writerAgeSelect, wordCountSelect, languageSelect].forEach(select => {
+        select.addEventListener('change', () => {
+            saveSettings(); // Save settings on change
+            invalidateCacheAndSave();
+            updateModeUI(); 
+        });
     });
 
     function renderIdeas() {
@@ -77,11 +196,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 noIdeasMessage.classList.remove('hidden'); 
             }
-            generateContentButton.disabled = true; // Use new button ID
+            generateContentButton.disabled = true; 
+            invalidateCacheAndSave(); 
+            outputSection.classList.add('hidden'); 
+            saveIdeas(); // Save empty ideas list
             return;
         }
         
-        generateContentButton.disabled = false; // Use new button ID
+        generateContentButton.disabled = false; 
         if (noIdeasMessage) {
             noIdeasMessage.classList.add('hidden'); 
         }
@@ -90,22 +212,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const colorPair = bubbleColors[idea.colorIndex % bubbleColors.length];
             const bubble = document.createElement('div');
             bubble.className = `idea-bubble ${colorPair.bg} ${colorPair.text}`;
-            
             const ideaTextSpan = document.createElement('span');
             ideaTextSpan.textContent = idea.text;
             bubble.appendChild(ideaTextSpan);
-
             const deleteButton = document.createElement('span');
             deleteButton.className = 'delete-idea';
             deleteButton.innerHTML = '&times;'; 
             deleteButton.setAttribute('aria-label', 'Delete idea');
             deleteButton.onclick = () => {
                 ideas.splice(index, 1);
-                renderIdeas();
+                saveIdeas(); // Save after deleting
+                invalidateCacheAndSave(); 
+                renderIdeas(); 
+                updateModeUI(); 
             };
             bubble.appendChild(deleteButton);
             ideasListContainer.appendChild(bubble);
         });
+        saveIdeas(); // Save after rendering all ideas
     }
 
     addIdeaButton.addEventListener('click', () => {
@@ -114,16 +238,16 @@ document.addEventListener('DOMContentLoaded', () => {
             ideas.push({ text: ideaText, colorIndex: nextColorIndex });
             nextColorIndex = (nextColorIndex + 1) % bubbleColors.length;
             ideaInput.value = '';
+            saveIdeas(); // Save after adding
+            invalidateCacheAndSave(); 
             renderIdeas();
+            updateModeUI(); 
             ideaInput.focus();
         }
     });
 
     ideaInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault(); 
-            addIdeaButton.click();
-        }
+        if (e.key === 'Enter') { e.preventDefault(); addIdeaButton.click(); }
     });
 
     async function getApiKeyFromServer() {
@@ -134,53 +258,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errorData.error || `Server responded with ${response.status}`);
             }
             const data = await response.json();
-            if (data.apiKey) {
-                return data.apiKey;
-            } else {
-                throw new Error(data.error || "API key not found in server response.");
-            }
-        } catch (error) {
-            console.error("Failed to fetch API key:", error);
-            throw error; 
-        }
+            if (data.apiKey) { return data.apiKey; } 
+            else { throw new Error(data.error || "API key not found in server response."); }
+        } catch (error) { console.error("Failed to fetch API key:", error); throw error; }
     }
 
-    generateContentButton.addEventListener('click', async () => { // Use new button ID
+    generateContentButton.addEventListener('click', async () => { 
         if (ideas.length === 0) {
             showMessageToUser('Please add some ideas first!', 'error');
             return;
         }
 
-        outputSection.classList.remove('hidden'); // Use new ID
+        outputSection.classList.remove('hidden'); 
         loadingIndicator.classList.remove('hidden');
-        generatedContentDiv.innerHTML = ''; // Use new ID, allow HTML for guidelines
+        generatedContentDiv.innerHTML = ''; 
         errorMessageDiv.classList.add('hidden');
         errorMessageDiv.textContent = '';
-        generateContentButton.disabled = true; // Use new button ID
+        generateContentButton.disabled = true; 
 
         const age = writerAgeSelect.value;
-        const wordCount = wordCountSelect.value; // This might be interpreted differently for guidelines
+        const wordCount = wordCountSelect.value; 
         const language = languageSelect.value;
         const ideaTexts = ideas.map(idea => idea.text);
+        
+        const currentIdeasSnap = ideasToStringSnapshot(ideas);
+        const currentSettingsSnap = getSettingsSnapshot(); 
 
-        let prompt;
-        if (currentWriterMode === 'story') {
-            prompt = constructStoryPrompt(age, wordCount, language, ideaTexts);
-            outputTitle.textContent = "Your Story!";
-        } else { // 'plan' mode
-            prompt = constructGuidelinesPrompt(age, language, ideaTexts);
-            outputTitle.textContent = "Your Writing Plan!";
-        }
+        const prompt = constructCombinedPrompt(age, wordCount, language, ideaTexts);
+        outputTitle.textContent = (currentWriterMode === 'story') ? "Your Story!" : "Your Writing Plan!";
 
         try {
             const apiKey = await getApiKeyFromServer(); 
-            if (!apiKey) { 
-                throw new Error("API Key could not be retrieved from server.");
-            }
+            if (!apiKey) { throw new Error("API Key could not be retrieved from server.");}
 
             let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
             const payload = { contents: chatHistory };
-            
             const modelName = 'gemini-2.5-flash-preview-05-20'; 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
             
@@ -201,15 +313,37 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.candidates && result.candidates.length > 0 &&
                 result.candidates[0].content && result.candidates[0].content.parts &&
                 result.candidates[0].content.parts.length > 0) {
-                let generatedText = result.candidates[0].content.parts[0].text;
+                const combinedText = result.candidates[0].content.parts[0].text;
                 
-                if (currentWriterMode === 'guidelines' || currentWriterMode === 'plan') {
-                     // Attempt to format guidelines a bit if they come as markdown-like lists
-                    generatedText = generatedText.replace(/^- /gm, '• ').replace(/^\* /gm, '• '); // Replace markdown list starters
-                    generatedContentDiv.innerHTML = generatedText.split('\n').map(line => `<p>${line}</p>`).join(''); // Basic paragraph per line
-                } else {
-                    generatedContentDiv.textContent = generatedText;
+                const planEndMarker = "[PLAN END]";
+                const storyStartMarker = "[STORY START]";
+                const planStartMarker = "[PLAN START]"; // Added for more robust parsing
+                const storyEndMarker = "[STORY END]"; // Added for more robust parsing
+                
+                let parsedPlan = "Could not extract plan. The AI might not have followed the format.";
+                let parsedStory = "Could not extract story. The AI might not have followed the format.";
+
+                const planStartIndexActual = combinedText.indexOf(planStartMarker);
+                const planEndIndexActual = combinedText.indexOf(planEndMarker);
+                const storyStartIndexActual = combinedText.indexOf(storyStartMarker);
+                const storyEndIndexActual = combinedText.indexOf(storyEndMarker);
+
+                if (planStartIndexActual !== -1 && planEndIndexActual !== -1 && planEndIndexActual > planStartIndexActual) {
+                    parsedPlan = combinedText.substring(planStartIndexActual + planStartMarker.length, planEndIndexActual).trim();
                 }
+                if (storyStartIndexActual !== -1 && storyEndIndexActual !== -1 && storyEndIndexActual > storyStartIndexActual) {
+                    parsedStory = combinedText.substring(storyStartIndexActual + storyStartMarker.length, storyEndIndexActual).trim();
+                } else if (storyStartIndexActual !== -1) { // Fallback if [STORY END] is missing
+                     parsedStory = combinedText.substring(storyStartIndexActual + storyStartMarker.length).trim();
+                }
+                
+                cachedContent.plan = parsedPlan.replace(/^- /gm, '• ').replace(/^\* /gm, '• ').split('\n').map(line => `<p>${line}</p>`).join('');
+                cachedContent.story = parsedStory;
+                cachedContent.ideasSnapshot = currentIdeasSnap;
+                cachedContent.settingsSnapshot = currentSettingsSnap;
+                saveCachedContent(); // Save the new cache
+
+                updateModeUI(); 
 
             } else {
                 console.error('Unexpected API response structure:', result);
@@ -223,56 +357,46 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error generating content:', error);
             errorMessageDiv.textContent = `Oops! Something went wrong: ${error.message}`;
             errorMessageDiv.classList.remove('hidden');
-            generatedContentDiv.textContent = (currentWriterMode === 'story') ? 'Could not generate the story. Please try again.' : 'Could not generate the plan. Please try again.';
+            generatedContentDiv.textContent = 'Could not generate content. Please try again.';
+            invalidateCacheAndSave(); 
         } finally {
             loadingIndicator.classList.add('hidden');
-            generateContentButton.disabled = false; // Use new button ID
+            generateContentButton.disabled = false; 
         }
     });
 
-    function constructStoryPrompt(age, wordCount, language, ideaTexts) {
-        return `You are a very kind, patient, and imaginative story writing assistant for a ${age}-year-old child (around 3rd grade level).
-This child has dyslexia and language processing disorder. Your generated story MUST adhere to these guidelines:
-- Language and Grammar: Use vocabulary and sentence structures that are appropriate and common for a ${age}-year-old. Avoid overly simplistic "baby talk" but ensure clarity. Sentences should be mostly simple or compound, avoiding complex clauses.
-- Focus on Ideas: Strictly base the story on the child's provided ideas. If the ideas are about personal experiences (e.g., "my dog," "my trip to the park"), the story should reflect this personal context. Do NOT invent new main characters, random names, or unrelated plot elements unless the child's ideas explicitly suggest a fictional direction or ask for creative additions. This is often for homework about their own experiences or specific themes.
-- Clarity for Learning Needs: While being age-appropriate, ensure the story is exceptionally clear and easy to follow. Help clarify and gently expand on the child's ideas.
-- Tone: Maintain a highly positive, encouraging, and playful tone.
-- Length: The story should be approximately ${wordCount} words long.
-- Language: The story must be in ${language}.
+    function constructCombinedPrompt(age, wordCount, language, ideaTexts) {
+        return `You are a very kind, patient, and highly skilled writing assistant for a ${age}-year-old child (around 3rd grade level).
+This child has dyslexia and language processing disorder. Your response MUST be structured into two distinct parts, clearly marked.
 
-Child's ideas:
+First, provide a simple, step-by-step writing plan. This plan should:
+- Be extremely easy to understand, using very short sentences and common vocabulary suitable for a ${age}-year-old with reading challenges.
+- Break down the writing process into tiny, manageable, concrete steps.
+- Directly relate to the child's provided ideas and help them structure their thoughts.
+- Be encouraging and gentle in tone.
+- Be in ${language}.
+Mark this section clearly like this:
+[PLAN START]
+(Your plan here, using bullet points or numbered steps. Each step should be a new paragraph or clearly separated.)
+[PLAN END]
+
+Second, immediately after the plan, write an example story that perfectly follows THE EXACT PLAN you just created. This story should:
+- Use vocabulary and sentence structures appropriate and common for a ${age}-year-old. Avoid oversimplification if the ideas are rich, but prioritize clarity.
+- Strictly base the story on the child's provided ideas and the plan you outlined. If ideas are personal, reflect that. Avoid inventing unrelated characters/plots unless the ideas strongly imply a fictional direction.
+- Be exceptionally clear and easy to follow.
+- Maintain a highly positive, encouraging, and playful tone.
+- Be approximately ${wordCount} words long.
+- Be in ${language}.
+Mark this section clearly like this:
+[STORY START]
+(Your example story here. Ensure it is distinct from the plan.)
+[STORY END]
+
+The child's ideas are:
 ${ideaTexts.map(idea => `- "${idea.replace(/"/g, "'")}"`).join('\n')}
 
-Please provide ONLY the story text as your response. Do not add any preambles like "Here's a story..." or any concluding remarks. Just the story.`;
-    }
-
-    function constructGuidelinesPrompt(age, language, ideaTexts) {
-        return `You are a very patient and supportive writing coach for a ${age}-year-old child (around 3rd grade level).
-This child has dyslexia and language processing disorder and needs help structuring their own writing for homework or fun.
-They have provided some ideas. Your task is to give them simple, actionable guidelines or a basic step-by-step plan to help them write their OWN piece using these ideas.
-
-Your guidelines MUST be:
-- Extremely Simple: Use very short sentences and the simplest possible vocabulary for a ${age}-year-old.
-- Very Clear and Concrete: Break down tasks into tiny, manageable steps. Avoid abstract concepts.
-- Structured: Present the guidelines as a clear list or sequence.
-- Encouraging and Gentle: Use a very positive and patient tone.
-- Focus on their Ideas: The guidelines should directly relate to the ideas the child provided. Help them think about how to connect their ideas. Do not suggest new, unrelated ideas.
-
-The guidelines should be in ${language}.
-
-Child's ideas:
-${ideaTexts.map(idea => `- "${idea.replace(/"/g, "'")}"`).join('\n')}
-
-Example of how to structure your response (but adapt to the child's ideas):
-"Great ideas! Let's make a plan for your story:
-1. Start by writing about: [mention first idea, e.g., 'your fun day']. What was the first thing that happened?
-2. Next, you can tell me about: [mention second idea, e.g., 'playing with your friend']. What game did you play?
-3. Then, add a sentence about: [mention third idea, e.g., 'eating ice cream']. What flavor was it?
-4. How does your story end? You can write about how you felt.
-
-Remember, just try your best and have fun writing!"
-
-Please provide ONLY these kinds of guidelines or a simple plan. Do NOT write the story for them.`;
+Ensure your entire response contains both the plan and the story, correctly marked with [PLAN START], [PLAN END], [STORY START], and [STORY END].
+The story should be a direct example of the plan in action.`;
     }
     
     function showMessageToUser(message, type = 'info') { 
@@ -284,12 +408,13 @@ Please provide ONLY these kinds of guidelines or a simple plan. Do NOT write the
             console.info("Info:", message); 
         }
     }
+    
+    // --- Initial Load ---
+    loadState(); // Load saved state first
+    renderIdeas(); // Then render ideas based on loaded state
+    updateModeUI(); // Then update UI based on loaded mode and display cached content if valid
 
-    // Initial UI setup
-    renderIdeas();
-    updateModeUI(); // Set initial button text and mode styles
-
-    // Menu toggle script (ensure this matches the one in other game pages if copied)
+    // --- Menu Logic ---
     const otherGamesButton = document.getElementById('other-games-button');
     const otherGamesDropdown = document.getElementById('other-games-dropdown');
     if (otherGamesButton && otherGamesDropdown) {
