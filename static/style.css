@@ -6,26 +6,150 @@ body {
 }
 
 /* --- Consistent App Header / Navigation --- */
-.app-header { z-index: 10; }
-.dropdown-content { 
-    border: 1px solid rgba(255, 255, 255, 0.15); /* For dark navBg */
-    /* background-color is tailwind navBg from HTML config */
+.app-header {
+    z-index: 10; 
 }
-.dropdown-content a { 
+.dropdown-content {
+    /* Uses navBg from Tailwind config in HTML */
+    border: 1px solid rgba(255, 255, 255, 0.15); /* Lighter border on dark navBg */
+}
+.dropdown-content a {
     transition: background-color 0.15s ease-in-out;
-    /* text color white from HTML config */
+    /* text color is white via Tailwind */
 }
-.dropdown-content a:hover {
-    /* background-color uses navHoverBg from HTML config */
+/* hover state color is navHoverBg from Tailwind config */
+.dropdown-content a:last-child {
+    border-bottom-left-radius: 0.375rem; 
+    border-bottom-right-radius: 0.375rem; 
 }
-.dropdown-content a:last-child { border-bottom-left-radius: 0.375rem; border-bottom-right-radius: 0.375rem; }
-.dropdown-content a:not(:last-child) { border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.dropdown-content a:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+}
 
-/* --- FRACTIONS GAME STYLES (Keep existing) --- */
-/* ... (fraction styles remain the same) ... */
 
-/* --- CLOCKS GAME STYLES (Keep existing) --- */
-/* ... (clocks styles remain the same) ... */
+/* --- FRACTIONS GAME STYLES --- */
+.fraction-input-wrapper { display: flex; flex-direction: column; align-items: center; width: 100px; }
+.fraction-input { width: 100%; padding: 0.5rem; text-align: center; border: 1px solid #D1D5DB; border-radius: 0.375rem; font-size: 1.125rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+.fraction-input.numerator { border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: -1px; }
+.fraction-input.denominator { border-top-left-radius: 0; border-top-right-radius: 0; }
+.fraction-line { width: 80%; height: 2px; background-color: #333333; margin: 2px 0; }
+#numerator1:focus, #denominator1:focus { border-color: #FF6347; box-shadow: 0 0 0 3px rgba(255, 99, 71, 0.3); z-index: 1; }
+#numerator2:focus, #denominator2:focus { border-color: #32CD32; box-shadow: 0 0 0 3px rgba(50, 205, 50, 0.3); z-index: 1; }
+
+.pizza-slice { stroke: #FFF8DC; stroke-width: 2; transition: fill 0.3s ease-in-out, opacity 0.3s ease-in-out; }
+.pizza-slice.filled-f1 { fill: #FF6347; opacity: 1; }
+.pizza-slice.empty-f1 { fill: #FFD700; opacity: 0.7; }
+.pizza-slice-f2 { stroke: #32CD32; stroke-width: 2; stroke-dasharray: 4, 3; fill-opacity: 0.6; }
+.pizza-slice-f2.filled-f2 { fill: #32CD32; }
+.pizza-slice-f2.empty-f2 { fill: #FFD700; opacity: 0.3; }
+
+/* Rectangle Fraction Styles - Re-verified */
+.rectangle-grid { 
+    position: absolute; 
+    top: 0; left: 0; width: 100%; height: 100%; 
+    display: flex; 
+    flex-direction: column;
+    padding: 0.5rem; 
+    box-sizing: border-box;
+    gap: 0.5rem; 
+}
+.rectangle-bar-instance { 
+    display: flex;
+    flex-direction: column; 
+    width: 100%;
+    flex: 1; 
+}
+.rectangle-row { 
+    display: flex; 
+    width: 100%; 
+    flex-grow: 1; 
+}
+.rectangle-segment { 
+    flex-grow: 1; 
+    border: 1px solid #B0B0B0; 
+    transition: background-color 0.3s ease-in-out; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    color: white; 
+    font-size: 0.7rem; 
+    box-sizing: border-box; 
+}
+.rectangle-segment.filled-f1 { background-color: #FF6347; }
+.rectangle-segment.empty-f1 { background-color: #FFD700; opacity: 0.6; }
+.rectangle-segment-f2 { border-style: dashed !important; border-color: #32CD32 !important; }
+.rectangle-segment-f2.filled-f2 { background-color: rgba(50, 205, 50, 0.6); }
+.rectangle-segment-f2.empty-f2 { background-color: rgba(255, 215, 0, 0.3); }
+
+/* Number Line Fraction Styles - Re-verified */
+#number-line-svg .line-path { stroke: #333333; stroke-width: 2px; }
+#number-line-svg .tick-major { stroke: #333333; stroke-width: 2px; }
+#number-line-svg .tick-minor { stroke: #aaaaaa; stroke-width: 1px; }
+#number-line-svg .marker-f1 { fill: #FF6347; stroke: #FFF8DC; stroke-width: 1px; }
+#number-line-svg .marker-f2 { fill: #32CD32; stroke: #FFF8DC; stroke-width: 1px; }
+#number-line-svg .label-f1 { fill: #FF6347; font-size: 10px; font-family: 'Inter', sans-serif; text-anchor: middle; }
+#number-line-svg .label-f2 { fill: #32CD32; font-size: 10px; font-family: 'Inter', sans-serif; text-anchor: middle; }
+#number-line-svg .label-axis { fill: #333333; font-size: 12px; font-family: 'Inter', sans-serif; text-anchor: middle; }
+
+#pizza-container svg { display: block; margin: auto; }
+
+
+/* --- CLOCKS GAME STYLES --- */
+#analog-clock-container { touch-action: none; cursor: default; }
+#hour-hand.hand-hoverable, #minute-hand.hand-hoverable, #second-hand.hand-hoverable { cursor: grab; }
+#hour-hand.hand-hover-active { stroke: #FF6347 !important; filter: drop-shadow(0 0 5px #FF6347); }
+#minute-hand.hand-hover-active { stroke: #FFD700 !important; filter: drop-shadow(0 0 5px #FFD700); }
+#second-hand.hand-hover-active { stroke: #32CD32 !important; filter: drop-shadow(0 0 5px #32CD32); }
+#hour-hand.hand-dragging { stroke: #d35400 !important; stroke-width: 11px !important; filter: drop-shadow(0 0 8px #d35400); cursor: grabbing !important; }
+#minute-hand.hand-dragging { stroke: #1a2531 !important; stroke-width: 8px !important; filter: drop-shadow(0 0 8px #1a2531); cursor: grabbing !important; }
+#second-hand.hand-dragging { stroke: #16a085 !important; stroke-width: 6px !important; filter: drop-shadow(0 0 8px #16a085); cursor: grabbing !important; }
+
+#digital-clock-display-wrapper { margin-left: auto; margin-right: auto; }
+#digital-clock-display {
+    line-height: 1; 
+    /* Font size is set by Tailwind classes in HTML (text-5xl md:text-6xl) */
+    /* Font family is font-roboto-mono from HTML config */
+}
+
+/* With a monospaced font, flexbox is no longer needed to control width of segments */
+.digital-clock-interactive .digital-segment {
+    cursor: pointer;
+    padding: 0 0.2em; /* Add slight padding around each segment */
+    border-radius: 0.25rem;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+    user-select: none; 
+}
+.digital-clock-interactive .digital-segment.analog-hover-highlight {
+    background-color: rgba(70, 130, 180, 0.3) !important; 
+    color: #A8D8F8 !important;
+}
+.digital-clock-interactive .digital-segment:hover,
+.digital-clock-interactive .digital-segment:focus {
+    background-color: rgba(46, 204, 113, 0.25); 
+    color: #58D68D; 
+    outline: 1px dashed rgba(46, 204, 113, 0.7);
+}
+.digital-clock-interactive .digital-segment.editing { 
+    background-color: rgba(46, 204, 113, 0.3);
+    color: #82E0AA;
+}
+
+.digital-segment-input {
+    font-family: 'Roboto Mono', monospace; /* IMPORTANT: Match the monospaced font */
+    font-size: inherit; 
+    line-height: inherit; 
+    color: inherit; 
+    background-color: transparent; 
+    border: none;
+    outline: none;
+    width: 2.2ch; /* 'ch' unit is the width of the '0' character, perfect for 2 digits */
+    text-align: center;
+    padding: 0;
+    margin: 0;
+    box-sizing: content-box; /* Use content-box for predictable width */
+    caret-color: #2ECC71; 
+}
+
 
 /* --- WRITING HELPER GAME STYLES --- */
 .idea-bubble { padding: 0.5rem 1rem; border-radius: 9999px; font-weight: 500; display: inline-flex; align-items: center; margin: 0.25rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.15s ease-out, box-shadow 0.15s ease-out; cursor: default; }
@@ -33,34 +157,11 @@ body {
 .idea-bubble .delete-idea { margin-left: 0.75rem; background-color: rgba(0,0,0,0.1); border-radius: 50%; width: 1.5rem; height: 1.5rem; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; color: rgba(0,0,0,0.5); cursor: pointer; opacity: 0; transition: opacity 0.15s ease-in-out, background-color 0.15s ease-in-out; }
 .idea-bubble:hover .delete-idea { opacity: 1; }
 .idea-bubble .delete-idea:hover { background-color: rgba(0,0,0,0.2); color: rgba(0,0,0,0.7); }
+#generated-content { white-space: pre-wrap; line-height: 1.7; font-family: 'Lexend', sans-serif; }
+#output-section ul, #output-section ol { list-style-position: inside; margin-left: 1em; margin-top: 0.5em; margin-bottom: 0.5em; }
+#output-section li { margin-bottom: 0.25em; }
 
-#generated-content { 
-    white-space: pre-wrap; 
-    line-height: 1.7; 
-    font-family: 'Lexend', sans-serif; /* Applied via Tailwind class font-lexend */
-}
-#output-section ul, #output-section ol {
-    list-style-position: inside;
-    margin-left: 1em;
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
-}
-#output-section li {
-    margin-bottom: 0.25em;
-}
-
-
-/* Mode Switch Custom Styles (if Tailwind classes are not enough) */
-/* The switch is mostly styled by Tailwind classes using colors defined in the HTML head config.
-   Example: #mode-switch for bg-switchBg or bg-switchActiveBg
-            #mode-switch-handle for bg-switchHandle and translate-x properties
-*/
-/* Add this if you need finer control over the switch handle's transition or appearance */
-#mode-switch-handle {
-    /* transition-property: transform; */ /* Already has 'transform' from Tailwind */
-}
-
-/* Input number spinners hide */
+/* General Input number spinners hide */
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; }

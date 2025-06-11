@@ -385,7 +385,7 @@ Second, immediately after the plan, write an example story that perfectly follow
 - Strictly base the story on the child's provided ideas and the plan you outlined. If ideas are personal, reflect that. Avoid inventing unrelated characters/plots unless the ideas strongly imply a fictional direction.
 - Be exceptionally clear and easy to follow.
 - Maintain a highly positive, encouraging, and playful tone.
-- Be approximately ${wordCount} words long.
+- Be limited to ${wordCount} words long.
 - Be in ${language}.
 Mark this section clearly like this:
 [STORY START]

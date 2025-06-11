@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@400;600&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -28,8 +28,8 @@
                         fractionTwo: '#32CD32', 
                         fractionTwoFill: 'rgba(50, 205, 50, 0.6)', 
                         comparison: '#6A0DAD',
-                        navBg: '#374151', // Matching clocks page
-                        navHoverBg: '#1F2937' // Matching clocks page
+                        navBg: '#4682B4', 
+                        navHoverBg: '#5A9BD5' 
                     }
                 }
             }
@@ -41,7 +41,7 @@
     <nav class="app-header bg-accent text-white w-full max-w-4xl mx-auto rounded-t-xl p-3 shadow-lg flex justify-between items-center mb-0 print:hidden">
         <a href="{{ url_for('homepage') }}" class="text-lg hover:underline font-fredoka">&larr; Vivi's Learning Corner</a>
         <div class="other-games-menu relative">
-            <button id="other-games-button" aria-haspopup="true" aria-expanded="false" class="font-fredoka text-lg hover:underline focus:outline-none focus:ring-2 focus:ring-white rounded">Other Games &darr;</button>
+            <button id="other-games-button" aria-haspopup="true" aria-expanded="false" class="font-fredoka text-lg hover:underline focus:outline-none focus:ring-2 focus:ring-white rounded px-2">Other Games &darr;</button>
             <div id="other-games-dropdown" class="dropdown-content absolute right-0 mt-2 w-52 bg-navBg rounded-md shadow-xl z-20 hidden" role="menu">
                 {% for game in all_games %}
                     {% if game.key != current_game_key %}
@@ -65,7 +65,7 @@
                     <h3 class="text-xl font-fredoka text-primary mb-2 text-center w-full">Fraction 1</h3>
                     <div class="fraction-input-wrapper">
                         <label for="numerator1" class="sr-only">Numerator 1:</label>
-                        <input type="number" id="numerator1" value="1" min="0" class="fraction-input numerator" aria-label="Numerator for Fraction 1">
+                        <input type="number" id="numerator1" value="1" min="0" max="200" class="fraction-input numerator" aria-label="Numerator for Fraction 1">
                         <div class="fraction-line"></div>
                         <label for="denominator1" class="sr-only">Denominator 1:</label>
                         <input type="number" id="denominator1" value="4" min="1" max="200" class="fraction-input denominator" aria-label="Denominator for Fraction 1">
@@ -78,15 +78,14 @@
                      <h3 class="text-xl font-fredoka text-fractionTwo mb-2 text-center w-full">Fraction 2 (Optional)</h3>
                     <div class="fraction-input-wrapper">
                         <label for="numerator2" class="sr-only">Numerator 2:</label>
-                        <input type="number" id="numerator2" value="" min="0" placeholder="e.g., 2" class="fraction-input numerator" aria-label="Numerator for Fraction 2">
+                        <input type="number" id="numerator2" value="" min="0" max="200" placeholder="e.g., 2" class="fraction-input numerator" aria-label="Numerator for Fraction 2">
                         <div class="fraction-line"></div>
                         <label for="denominator2" class="sr-only">Denominator 2:</label>
                         <input type="number" id="denominator2" value="" min="1" max="200" placeholder="e.g., 5" class="fraction-input denominator" aria-label="Denominator for Fraction 2">
                     </div>
                 </div>
             </div>
-            <div id="validation-message1" class="text-red-500 text-sm mt-3 text-center h-5"></div>
-            <div id="validation-message2" class="text-red-500 text-sm mt-1 text-center h-5"></div>
+            <div id="validation-message-container" class="text-red-500 text-sm mt-3 text-center h-5"></div>
         </section>
 
         <section class="space-y-10">
@@ -99,12 +98,16 @@
             </div>
             <div>
                 <h2 class="text-2xl font-fredoka text-accent mb-4 text-center">Rectangle Fraction</h2>
-                <div id="rectangle-container" class="w-full min-h-[8rem] md:min-h-[10rem] bg-gray-100 rounded-lg shadow p-4 relative"></div>
+                <div id="rectangle-container" class="w-full min-h-[8rem] md:min-h-[10rem] bg-gray-100 rounded-lg shadow p-4 relative">
+                    <!-- JS will create .rectangle-grid divs here -->
+                </div>
             </div>
             <div>
                 <h2 class="text-2xl font-fredoka text-accent mb-4 text-center">Number Line Fraction</h2>
                 <div id="number-line-container" class="w-full h-32 md:h-40 bg-gray-100 rounded-lg shadow p-4 flex items-center justify-center">
-                    <svg id="number-line-svg" viewBox="0 0 400 100" class="w-full h-full"></svg>
+                    <svg id="number-line-svg" viewBox="0 0 400 100" class="w-full h-full">
+                        <!-- JS will create number line elements here -->
+                    </svg>
                 </div>
             </div>
         </section>
@@ -118,50 +121,15 @@
         // Script for "Other Games" dropdown toggle (hover and click/focus)
         const otherGamesButton = document.getElementById('other-games-button');
         const otherGamesDropdown = document.getElementById('other-games-dropdown');
-
         if (otherGamesButton && otherGamesDropdown) {
             const menuArea = otherGamesButton.parentElement; 
-
-            menuArea.addEventListener('mouseenter', () => {
-                otherGamesDropdown.classList.remove('hidden');
-                otherGamesButton.setAttribute('aria-expanded', 'true');
-            });
-            menuArea.addEventListener('mouseleave', () => {
-                if (!menuArea.contains(document.activeElement)) {
-                    otherGamesDropdown.classList.add('hidden');
-                    otherGamesButton.setAttribute('aria-expanded', 'false');
-                }
-            });
-            otherGamesButton.addEventListener('focus', () => {
-                otherGamesDropdown.classList.remove('hidden');
-                otherGamesButton.setAttribute('aria-expanded', 'true');
-            });
-            otherGamesButton.addEventListener('blur', (event) => {
-                if (!menuArea.contains(event.relatedTarget)) {
-                    otherGamesDropdown.classList.add('hidden');
-                    otherGamesButton.setAttribute('aria-expanded', 'false');
-                }
-            });
-            otherGamesDropdown.addEventListener('focusin', () => {
-                 otherGamesDropdown.classList.remove('hidden');
-            });
-            otherGamesDropdown.addEventListener('focusout', (event) => {
-                if (!menuArea.contains(event.relatedTarget)) { 
-                    otherGamesDropdown.classList.add('hidden');
-                    otherGamesButton.setAttribute('aria-expanded', 'false');
-                }
-            });
-            otherGamesButton.addEventListener('click', (event) => {
-                event.stopPropagation(); 
-                const isHidden = otherGamesDropdown.classList.toggle('hidden');
-                otherGamesButton.setAttribute('aria-expanded', String(!isHidden));
-            });
-            document.addEventListener('click', (event) => {
-                if (menuArea && !menuArea.contains(event.target)) {
-                    otherGamesDropdown.classList.add('hidden');
-                    otherGamesButton.setAttribute('aria-expanded', 'false');
-                }
-            });
+            menuArea.addEventListener('mouseenter', () => { otherGamesDropdown.classList.remove('hidden'); otherGamesButton.setAttribute('aria-expanded', 'true'); });
+            menuArea.addEventListener('mouseleave', (event) => { if (!menuArea.contains(event.relatedTarget) && document.activeElement !== otherGamesButton && !otherGamesDropdown.contains(document.activeElement)) { otherGamesDropdown.classList.add('hidden'); otherGamesButton.setAttribute('aria-expanded', 'false'); } });
+            otherGamesButton.addEventListener('focus', () => { otherGamesDropdown.classList.remove('hidden'); otherGamesButton.setAttribute('aria-expanded', 'true'); });
+            otherGamesDropdown.addEventListener('focusin', () => { otherGamesDropdown.classList.remove('hidden'); });
+            otherGamesDropdown.addEventListener('focusout', (event) => { if (!menuArea.contains(event.relatedTarget)) { otherGamesDropdown.classList.add('hidden'); otherGamesButton.setAttribute('aria-expanded', 'false'); } });
+            otherGamesButton.addEventListener('click', (event) => { event.stopPropagation(); const isHidden = otherGamesDropdown.classList.toggle('hidden'); otherGamesButton.setAttribute('aria-expanded', String(!isHidden)); });
+            document.addEventListener('click', (event) => { if (menuArea && !menuArea.contains(event.target)) { otherGamesDropdown.classList.add('hidden'); otherGamesButton.setAttribute('aria-expanded', 'false'); } });
         }
     </script>
 </body>

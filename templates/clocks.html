@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <!-- UPDATED FONT: Replaced Orbitron with Roboto Mono for digital clock -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@400;600&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -17,7 +18,7 @@
                     fontFamily: {
                         'fredoka': ['"Fredoka One"', 'cursive'],
                         'inter': ['Inter', 'sans-serif'],
-                        'orbitron': ['Orbitron', 'sans-serif'] 
+                        'roboto-mono': ['"Roboto Mono"', 'monospace'] // Monospaced font for digital clock
                     },
                     colors: {
                         primary: '#FF6347', 
@@ -28,13 +29,13 @@
                         textLight: '#FFFFFF',
                         clockBg: '#E0E0E0',
                         clockBorder: '#B0B0B0',
-                        hourHandColor: '#2c3e50', // Dark Slate Gray - More distinct
-                        minuteHandColor: '#e67e22', // Carrot Orange - More distinct
-                        secondHandColor: '#c0392b', // Pomegranate Red - More distinct
-                        digitalBg: '#1F2937', // Darker, more modern digital background (Tailwind gray-800)
-                        digitalFg: '#2ECC71', // Emerald Green - Brighter digital numbers
-                        navBg: '#374151', // Tailwind gray-700 (slightly lighter than digitalBg for contrast)
-                        navHoverBg: '#1F2937' // Tailwind gray-800 (matches digitalBg)
+                        hourHandColor: '#2c3e50', 
+                        minuteHandColor: '#e67e22', 
+                        secondHandColor: '#c0392b', 
+                        digitalBg: '#1F2937', 
+                        digitalFg: '#2ECC71', 
+                        navBg: '#4682B4', 
+                        navHoverBg: '#5A9BD5' 
                     }
                 }
             }
@@ -46,7 +47,7 @@
     <nav class="app-header bg-accent text-white w-full max-w-4xl mx-auto rounded-t-xl p-3 shadow-lg flex justify-between items-center mb-0 print:hidden">
         <a href="{{ url_for('homepage') }}" class="text-lg hover:underline font-fredoka">&larr; Vivi's Learning Corner</a>
         <div class="other-games-menu relative">
-            <button id="other-games-button" aria-haspopup="true" aria-expanded="false" class="font-fredoka text-lg hover:underline focus:outline-none focus:ring-2 focus:ring-white rounded">Other Games &darr;</button>
+            <button id="other-games-button" aria-haspopup="true" aria-expanded="false" class="font-fredoka text-lg hover:underline focus:outline-none focus:ring-2 focus:ring-white rounded px-2">Other Games &darr;</button>
             <div id="other-games-dropdown" class="dropdown-content absolute right-0 mt-2 w-52 bg-navBg rounded-md shadow-xl z-20 hidden" role="menu">
                 {% for game in all_games %}
                     {% if game.key != current_game_key %}
@@ -81,7 +82,8 @@
             <section class="flex flex-col items-center">
                 <h2 class="text-2xl font-fredoka text-accent mb-4">Digital Clock</h2>
                 <div id="digital-clock-display-wrapper" class="w-full max-w-xs sm:max-w-sm"> 
-                    <div id="digital-clock-display" class="digital-clock-interactive bg-digitalBg text-digitalFg font-orbitron py-3 px-1 rounded-lg shadow-inner w-full text-center flex justify-between items-center">
+                    <!-- UPDATED FONT: using font-roboto-mono -->
+                    <div id="digital-clock-display" class="digital-clock-interactive bg-digitalBg text-digitalFg font-roboto-mono py-3 px-2 rounded-lg shadow-inner w-full text-center flex justify-between items-center text-5xl md:text-6xl">
                         <span id="digital-hour" class="digital-segment" data-unit="hour" tabindex="0">12</span>
                         <span class="digital-colon">:</span>
                         <span id="digital-minute" class="digital-segment" data-unit="minute" tabindex="0">00</span>
@@ -102,6 +104,6 @@
     </div>
 
     <script src="{{ url_for('static', filename='clocks_script.js') }}"></script>
-    </body>
+</body>
 </html>
 
