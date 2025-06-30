@@ -161,6 +161,53 @@ body {
 #output-section ul, #output-section ol { list-style-position: inside; margin-left: 1em; margin-top: 0.5em; margin-bottom: 0.5em; }
 #output-section li { margin-bottom: 0.25em; }
 
+
+/* --- TYPING GAME STYLES --- */
+#phrase-display .letter-span {
+    display: inline-block;
+    padding: 0 1px;
+    border-bottom: 3px solid transparent; /* For the cursor */
+    transition: color 0.2s, border-color 0.2s;
+}
+
+#phrase-display .letter-span.current {
+    border-bottom-color: #4682B4; /* accent color */
+    animation: blink 1s infinite;
+}
+
+#phrase-display .letter-span.correct {
+    color: #2ECC71; /* typingCorrect */
+    border-bottom-color: transparent !important; /* Remove cursor on correct */
+}
+
+#phrase-display .letter-span.incorrect {
+    color: #E74C3C; /* typingIncorrect */
+    animation: shake 0.5s;
+    position: relative;
+}
+
+/* 'X' mark for incorrect letters */
+#phrase-display .letter-span.incorrect::after {
+    content: '✗';
+    position: absolute;
+    top: -20px;
+    left: 0;
+    font-size: 1rem;
+    color: #E74C3C;
+}
+
+
+@keyframes blink {
+    50% { border-bottom-color: transparent; }
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
 /* General Input number spinners hide */
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }

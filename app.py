@@ -52,6 +52,7 @@ available_games = [
     {'key': 'fractions', 'name': 'Learn Fractions', 'url_func_name': 'fractions_page'},
     {'key': 'clocks', 'name': 'Clocks and Time', 'url_func_name': 'clocks_page'},
     {'key': 'writing_helper', 'name': 'Writing Helper', 'url_func_name': 'writing_helper_page'},
+    {'key': 'typing_game', 'name': 'Typing Game', 'url_func_name': 'typing_game_page'}, # New Game
 ]
 
 @app.route('/')
@@ -69,6 +70,10 @@ def clocks_page():
 @app.route('/writing-helper')
 def writing_helper_page():
     return render_template('writing_helper.html', current_game_key='writing_helper', all_games=available_games)
+
+@app.route('/typing-game')
+def typing_game_page():
+    return render_template('typing_game.html', current_game_key='typing_game', all_games=available_games)
 
 @app.route('/get-gemini-api-key')
 def get_gemini_api_key():
