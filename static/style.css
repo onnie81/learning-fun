@@ -161,13 +161,22 @@ body {
 #output-section ul, #output-section ol { list-style-position: inside; margin-left: 1em; margin-top: 0.5em; margin-bottom: 0.5em; }
 #output-section li { margin-bottom: 0.25em; }
 
-
 /* --- TYPING GAME STYLES --- */
 #phrase-display .letter-span {
     display: inline-block;
     padding: 0 1px;
     border-bottom: 3px solid transparent; /* For the cursor */
-    transition: color 0.2s, border-color 0.2s;
+    transition: color 0.2s, border-color 0.2s, background-color 0.2s, transform 0.2s;
+    border-radius: 3px;
+}
+/* Style for visible spaces */
+#phrase-display .space-char {
+    background-color: #e2e8f0; /* Tailwind gray-200 */
+    min-width: 1ch; /* Give it the width of one character */
+    margin: 0 1px;
+}
+#phrase-display .space-char.current {
+    background-color: #90cdf4; /* Tailwind blue-300 */
 }
 
 #phrase-display .letter-span.current {
@@ -177,13 +186,16 @@ body {
 
 #phrase-display .letter-span.correct {
     color: #2ECC71; /* typingCorrect */
-    border-bottom-color: transparent !important; /* Remove cursor on correct */
+    border-bottom-color: transparent !important; 
+    animation: pop 0.3s ease-out; /* Success feedback animation */
 }
 
 #phrase-display .letter-span.incorrect {
-    color: #E74C3C; /* typingIncorrect */
+    color: white !important; /* Make text white to contrast with red overlay */
+    background-color: #E74C3C; /* Red overlay */
     animation: shake 0.5s;
     position: relative;
+    border-radius: 4px;
 }
 
 /* 'X' mark for incorrect letters */
@@ -191,11 +203,10 @@ body {
     content: '✗';
     position: absolute;
     top: -20px;
-    left: 0;
+    left: 2px;
     font-size: 1rem;
     color: #E74C3C;
 }
-
 
 @keyframes blink {
     50% { border-bottom-color: transparent; }
@@ -206,6 +217,12 @@ body {
     20%, 80% { transform: translate3d(2px, 0, 0); }
     30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
     40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+@keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); color: #34D399; }
+    100% { transform: scale(1); }
 }
 
 /* General Input number spinners hide */
