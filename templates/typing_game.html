@@ -31,6 +31,10 @@
                         typingCorrect: '#2ECC71',
                         typingIncorrect: '#E74C3C',
                         typingText: '#34495E',
+                        keyBg: '#E5E7EB',
+                        keyText: '#374151',
+                        keyPressedBg: '#4682B4',
+                        keyPressedText: '#FFFFFF',
                     }
                 }
             }
@@ -59,9 +63,7 @@
             <p class="text-lg text-gray-600 mt-2">Type the words before time runs out!</p>
         </header>
 
-        <!-- Game UI -->
         <div id="game-container" class="w-full mx-auto">
-            <!-- Stats Bar -->
             <div class="flex justify-between items-center mb-4 p-4 bg-accent/10 rounded-lg">
                 <div>
                     <label for="difficulty-select" class="text-sm font-bold text-accent">Difficulty:</label>
@@ -75,29 +77,42 @@
                     <span class="text-sm font-bold text-accent">SCORE</span>
                     <p id="score-display" class="text-2xl font-bold text-textDark">0</p>
                 </div>
+                <!-- New CPM Display -->
                 <div class="text-center">
-                    <span class="text-sm font-bold text-accent">EXPERTISE</span>
-                    <p id="expertise-display" class="text-2xl font-bold text-textDark">0</p>
+                    <span class="text-sm font-bold text-accent">SPEED (CPM)</span>
+                    <p id="cpm-display" class="text-2xl font-bold text-textDark">0</p>
+                </div>
+                <div class="text-center">
+                    <span class="text-sm font-bold text-accent">MAX SCORE</span>
+                    <p id="max-score-display" class="text-2xl font-bold text-textDark">0</p>
                 </div>
             </div>
 
-            <!-- Timer Bar -->
             <div class="w-full bg-gray-200 rounded-full h-4 mb-6 shadow-inner">
                 <div id="timer-bar" class="bg-gradient-to-r from-green-400 to-blue-500 h-4 rounded-full transition-all duration-200 ease-linear" style="width: 100%"></div>
             </div>
 
-            <!-- Word Display -->
-            <div id="phrase-display" class="p-6 bg-gray-100 rounded-lg text-3xl md:text-4xl font-roboto-mono tracking-wider text-typingText select-none flex justify-center items-center min-h-[80px]">
-                <!-- Letter spans will be generated here -->
-            </div>
+            <div id="phrase-display" class="p-6 bg-gray-100 rounded-lg text-3xl md:text-4xl font-roboto-mono tracking-wider text-typingText select-none flex justify-center items-center min-h-[80px]"></div>
 
-            <!-- Game Messages / Start Button -->
             <div id="game-message-box" class="text-center mt-8">
                 <p id="game-message" class="text-2xl font-semibold text-accent mb-4">Select a difficulty and get ready!</p>
                 <button id="start-game-button" class="bg-primary hover:bg-red-700 text-white font-fredoka text-2xl py-3 px-10 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-200">Start Game</button>
             </div>
         </div>
+        
+        <div id="keyboard-container" class="mt-10 p-2 md:p-4 bg-gray-100 rounded-lg shadow-inner">
+            <!-- Keyboard rows and keys will be generated here -->
+        </div>
+
     </div>
+
+    <div id="keyboard-icon-templates" class="hidden">
+        <svg id="icon-backspace" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21 11H6.83l3.58-3.59L9 6l-6 6 6 6 1.41-1.41L6.83 13H21v-2z"></path></svg>
+        <svg id="icon-enter" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19 7v4H5.83l3.58-3.59L8 6l-6 6 6 6 1.41-1.41L5.83 15H21V7h-2z"></path></svg>
+        <svg id="icon-shift" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8.41L16.59 13 18 11.59l-6-6-6 6L7.41 13 12 8.41zM12 20h.01v-2H12V20z"></path></svg>
+        <svg id="icon-tab" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 15.38V8.62L18.88 12l-3.38 3.38M8.5 8.62v6.76L5.12 12l3.38-3.38M2 6v12h2V6H2zm18 0v12h2V6h-2z"></path></svg>
+    </div>
+
     <script src="{{ url_for('static', filename='typing_game_script.js') }}"></script>
     <script>
         // Menu script

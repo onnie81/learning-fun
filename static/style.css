@@ -161,44 +161,54 @@ body {
 #output-section ul, #output-section ol { list-style-position: inside; margin-left: 1em; margin-top: 0.5em; margin-bottom: 0.5em; }
 #output-section li { margin-bottom: 0.25em; }
 
+
 /* --- TYPING GAME STYLES --- */
+#phrase-display {
+    display: flex; /* Changed to flex for multi-line support */
+    flex-direction: column; /* Stack lines vertically */
+    align-items: center; /* Center lines horizontally */
+    transition: transform 0.3s ease-in-out;
+}
+.phrase-line {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap; /* Allow letters to wrap within a line if needed */
+}
 #phrase-display .letter-span {
     display: inline-block;
     padding: 0 1px;
-    border-bottom: 3px solid transparent; /* For the cursor */
+    border-bottom: 3px solid transparent; 
     transition: color 0.2s, border-color 0.2s, background-color 0.2s, transform 0.2s;
     border-radius: 3px;
 }
-/* Style for visible spaces */
 #phrase-display .space-char {
-    background-color: #e2e8f0; /* Tailwind gray-200 */
-    min-width: 1ch; /* Give it the width of one character */
+    background-color: #e2e8f0; 
+    min-width: 1ch; 
     margin: 0 1px;
+    display: inline-block;
+    height: 1.2em; 
+    vertical-align: bottom;
 }
 #phrase-display .space-char.current {
-    background-color: #90cdf4; /* Tailwind blue-300 */
+    background-color: #90cdf4; 
 }
-
 #phrase-display .letter-span.current {
-    border-bottom-color: #4682B4; /* accent color */
+    border-bottom-color: #4682B4; 
     animation: blink 1s infinite;
 }
-
 #phrase-display .letter-span.correct {
-    color: #2ECC71; /* typingCorrect */
+    color: #2ECC71; 
     border-bottom-color: transparent !important; 
-    animation: pop 0.3s ease-out; /* Success feedback animation */
+    animation: pop 0.3s ease-out; 
 }
-
 #phrase-display .letter-span.incorrect {
-    color: white !important; /* Make text white to contrast with red overlay */
-    background-color: #E74C3C; /* Red overlay */
-    animation: shake 0.5s;
+    color: white !important; 
+    background-color: #E74C3C; 
+    animation: shake-letter 0.5s;
     position: relative;
     border-radius: 4px;
 }
-
-/* 'X' mark for incorrect letters */
 #phrase-display .letter-span.incorrect::after {
     content: '✗';
     position: absolute;
@@ -208,17 +218,59 @@ body {
     color: #E74C3C;
 }
 
-@keyframes blink {
-    50% { border-bottom-color: transparent; }
+/* Visual Keyboard Styles */
+#keyboard-container.shake {
+    animation: shake-keyboard 0.4s cubic-bezier(.36,.07,.19,.97) both;
 }
+.keyboard-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 6px;
+    gap: 6px;
+}
+.key {
+    background-color: #E5E7EB; 
+    color: #374151; 
+    border: 1px solid #D1D5DB;
+    border-bottom-width: 3px;
+    border-radius: 6px;
+    padding: 0; 
+    font-weight: 500;
+    min-width: 40px;
+    height: 40px;
+    text-align: center;
+    transition: all 0.07s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    flex-basis: 0;
+}
+.key-wide { flex-grow: 1.5; }
+.key-wider { flex-grow: 2; }
+.key-widest { flex-grow: 2.5; }
+.key-space { flex-grow: 8; }
+.key.key-pressed {
+    background-color: #4682B4; 
+    color: #FFFFFF; 
+    border-bottom-width: 1px;
+    transform: translateY(2px);
+}
+.key svg { width: 1.25em; height: 1.25em; }
 
-@keyframes shake {
+@keyframes blink { 50% { border-bottom-color: transparent; } }
+@keyframes shake-letter {
     10%, 90% { transform: translate3d(-1px, 0, 0); }
     20%, 80% { transform: translate3d(2px, 0, 0); }
     30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
     40%, 60% { transform: translate3d(4px, 0, 0); }
 }
-
+@keyframes shake-keyboard {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+    40%, 60% { transform: translate3d(3px, 0, 0); }
+}
 @keyframes pop {
     0% { transform: scale(1); }
     50% { transform: scale(1.2); color: #34D399; }
