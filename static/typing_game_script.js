@@ -33,9 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
         MAX_TIME_INCREMENT_REDUCTION: 1.5, // Max reward reduction
 
         // Scoring Mechanics
-        BASE_SCORE_PER_CHAR: 10,
-        SCORE_PENALTY: -5,
-        SCORE_MULTIPLIER_THRESHOLD: 250, // Increase multiplier every X max score points
+        BASE_SCORE_PER_CHAR: 2,
+        SCORE_PENALTY: -1,
+        SCORE_MULTIPLIER_THRESHOLD: 1000, // Increase multiplier every X max score points
         SCORE_MULTIPLIER_INCREMENT: 0.1,
 
         // Animation & Delay Timings
@@ -50,7 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Game State ---
     let gameState = {
-        phraseBank: [], 
+        phraseBank: [],
+	chatHistory: [],
         currentPhrase: "",
         currentIndex: 0,
         maxScores: { easy: 0, medium: 0, hard: 0 },
@@ -93,63 +94,93 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
 
-    function constructTypingPrompt(difficulty, maxScore) {
-        let effectiveDifficulty;
-        let complexityDescription;
 
-        if (maxScore < GAME_CONFIG.EASY_SCORE_THRESHOLD) {
-            effectiveDifficulty = "Beginner (Easy)";
-            complexityDescription = `focus on single keyboard rows (e.g., only 'asdfg' or only 'qwerty'). Use simple, common, lowercase English words. This is for a child just learning finger placement (finger typing). Example: 'a sad lad asks a lass'.`;
-        } else if (maxScore < GAME_CONFIG.MEDIUM_SCORE_THRESHOLD) {
-            effectiveDifficulty = "Intermediate (Medium)";
-            complexityDescription = `use common English words that require more hand alternation and reaching for top and bottom row keys. Include simple punctuation like commas and periods. Example: 'The quick brown fox, as they say.'`;
-        } else {
-            effectiveDifficulty = "Advanced (Hard)";
-            complexityDescription = `use real, properly spelled English words that are longer or have more complex, less common letter combinations (e.g., 'queue', 'rhythm', 'acquire'). Include some uppercase letters (requiring Shift) and occasional numbers. Example: 'The mysterious zephyr quietly vexed the judge.'`;
-        }
+    // --- API and Phrase Generation ---
+    function constructTypingPrompt(difficulty, maxScore, lastMaxScore, history) {
+        const getDifficultyTier = (score) => {
+            if (score < GAME_CONFIG.EASY_SCORE_THRESHOLD) return 'Beginner (Easy)';
+            if (score < GAME_CONFIG.MEDIUM_SCORE_THRESHOLD) return 'Intermediate (Medium)';
+            return 'Advanced (Hard)';
+        };
+
+        const oldTier = getDifficultyTier(lastMaxScore);
+        const newTier = getDifficultyTier(maxScore);
+        const difficultyLevel = newTier;
         
+        let complexityDescription;
+        switch(difficultyLevel) {
+            case 'Beginner (Easy)':
+                complexityDescription = `focus on easy to type words (single row, close letters together, etc). Use simple, common, lowercase English words. This is for a child just learning finger placement (finger typing). Example: 'a sad lad asks a lass, kilo tree'.`;
+                break;
+            case 'Intermediate (Medium)':
+                complexityDescription = `use common English words that require more hand alternation and reaching for top and bottom row keys. Include simple punctuation like commas and periods. Example: 'The quick brown fox, as they say.'`;
+                break;
+            case 'Advanced (Hard)':
+                complexityDescription = `use real, properly spelled English words that are longer or have more complex, less common letter combinations (e.g., 'queue', 'rhythm', 'acquire'). Include some uppercase letters (requiring Shift) and occasional numbers. Example: 'The mysterious zephyr quietly vexed the judge.'`;
+                break;
+        }
+
         if (difficulty === 'medium' && maxScore < GAME_CONFIG.EASY_SCORE_THRESHOLD) {
-             effectiveDifficulty = "Intermediate (Medium)";
              complexityDescription = `use common English words that require more hand alternation and reaching for top and bottom row keys. Include simple punctuation like commas and periods. Example: 'The quick brown fox, as they say.'`;
         } else if (difficulty === 'hard' && maxScore < GAME_CONFIG.MEDIUM_SCORE_THRESHOLD) {
-            effectiveDifficulty = "Advanced (Hard)";
             complexityDescription = `use real, properly spelled English words that are longer or have more complex, less common letter combinations (e.g., 'queue', 'rhythm', 'acquire'). Include some uppercase letters (requiring Shift) and occasional numbers. Example: 'The mysterious zephyr quietly vexed the judge.'`;
         }
 
-        return `You are a typing tutor assistant. Your task is to generate a list of 5 short, didactic phrases for a user to practice typing. The user's skill level is "${effectiveDifficulty}".
+        // Check if this is the first prompt in the conversation
+        if (history.length === 0) {
+            return `You are a typing tutor assistant. Your task is to generate a list of 5 short, didactic phrases for a user to practice typing. The user's skill level is "${difficultyLevel}".
 For this level, ${complexityDescription}
 The phrases should be short, between 3 to 8 words each.
 Provide your response as a JSON object with a single key "phrases" which is an array of 5 strings.
 Example response for a medium level: {"phrases": ["The quick brown fox.", "Jumps over the lazy dog.", "A pocket full of posies.", "Ashes to ashes, we fall.", "Practice makes perfect, they say." ]}`;
+        } else {
+            // This is a follow-up prompt
+            let followUpInstruction = `Great, that was helpful. Now, please generate 10 more new phrases at the same "${difficultyLevel}" skill level. It is very important that you do not repeat any phrases you have provided before in this conversation.`;
+            if (newTier !== oldTier) {
+                followUpInstruction = `The user has improved! Please switch the complexity to the new "${newTier}" level and generate 10 new phrases. Do not repeat any previous phrases.`;
+            }
+            return `${followUpInstruction}
+For this level, ${complexityDescription}
+The phrases should be short, between 3 to 8 words each.
+Provide your response as a JSON object with a single key "phrases" which is an array of 10 strings.`;
+        }
     }
 
     async function fetchNewPhrases(isInitialFetch = false) {
         if (gameState.isFetching) return;
         gameState.isFetching = true;
         if (isInitialFetch) {
-		// TODO: I should probably make this a waiting roundy thingy
             gameMessage.textContent = 'Getting new words...';
             gameMessageBox.style.display = 'block';
         }
         try {
-            const prompt = constructTypingPrompt(gameState.difficulty, gameState.maxScores[gameState.difficulty]);
+            const prompt = constructTypingPrompt(gameState.difficulty, gameState.score, gameState.lastMaxScoreOnFetch, gameState.chatHistory);
+            
+            gameState.lastMaxScoreOnFetch = gameState.score;
+            gameState.chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
             const modelName = 'gemini-2.5-flash-lite-preview-06-17';
 
             const response = await fetch('/api/generate-typing-phrases', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    prompt: prompt,
+                    history: gameState.chatHistory,
                     model: modelName
                 })
             });
-	
-	    if (!response.ok) {
+
+            if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ error: `Server error: ${response.statusText}` }));
                 throw new Error(errorData.error || `Server responded with status ${response.status}`);
             }
 
             const result = await response.json();
+            
+            if (result.candidates && result.candidates[0].content) {
+                gameState.chatHistory.push(result.candidates[0].content);
+            }
+
             const text = result.candidates[0].content.parts[0].text;
             const parsedJson = JSON.parse(text);
 
@@ -163,6 +194,11 @@ Example response for a medium level: {"phrases": ["The quick brown fox.", "Jumps
                 gameState.phraseBank = ["The quick brown fox jumps over the lazy dog."];
                 setTimeout(() => { gameMessageBox.style.display = 'none'; }, 2000);
             }
+	    // If a follow-up call fails, remove the last user message from history so we can try again later.
+            if (gameState.chatHistory.length > 0 && gameState.chatHistory[gameState.chatHistory.length - 1].role === 'user') {
+                gameState.chatHistory.pop();
+                console.error("Pop the chat history")
+	    }
         } finally {
             gameState.isFetching = false;
         }

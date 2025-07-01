@@ -135,16 +135,16 @@ def generate_typing_phrases():
     if not data:
         return jsonify({'error': 'Invalid JSON in request body.'}), 400
         
-    prompt = data.get('prompt')
+    chat_history = data.get('history')
     model_name = data.get('model', 'gemini-2.5-flash')
 
-    if not prompt:
+    if not chat_history:
         return jsonify({'error': 'No prompt provided.'}), 400
 
     GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
     
     payload = {
-        "contents": [{"parts": [{"text": prompt}]}],
+        "contents": chat_history,
         "generationConfig": {
             "responseMimeType": "application/json",
             "responseSchema": {
