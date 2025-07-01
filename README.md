@@ -52,7 +52,7 @@ An adaptive game to practice keyboard skills. It features a visual keyboard that
 ## Project Structure
 
 The project is organized as follows:
-
+```
 learning-fun/
   ├── app.py                      # Flask application (routing and logic)
   ├── Dockerfile                  # Docker configuration for containerization
@@ -70,6 +70,7 @@ learning-fun/
       ├── clocks.html
       ├── writing_helper.html
       └── typing_game.html
+```
 ## Prerequisites
 
 * **Docker Desktop** (for Windows/Mac) or **Docker Engine** (for Linux) installed and running on your system.
