@@ -250,19 +250,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Enter') { e.preventDefault(); addIdeaButton.click(); }
     });
 
-    async function getApiKeyFromServer() {
-        try {
-            const response = await fetch('/get-gemini-api-key'); 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: "Failed to fetch API key, server error."}));
-                throw new Error(errorData.error || `Server responded with ${response.status}`);
-            }
-            const data = await response.json();
-            if (data.apiKey) { return data.apiKey; } 
-            else { throw new Error(data.error || "API key not found in server response."); }
-        } catch (error) { console.error("Failed to fetch API key:", error); throw error; }
-    }
-
     generateContentButton.addEventListener('click', async () => { 
         if (ideas.length === 0) {
             showMessageToUser('Please add some ideas first!', 'error');
@@ -285,31 +272,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentSettingsSnap = getSettingsSnapshot(); 
 
         const prompt = constructCombinedPrompt(age, wordCount, language, ideaTexts);
+	const modelName = 'gemini-2.5-pro';
         outputTitle.textContent = (currentWriterMode === 'story') ? "Your Story!" : "Your Writing Plan!";
 
         try {
-            const apiKey = await getApiKeyFromServer(); 
-            if (!apiKey) { throw new Error("API Key could not be retrieved from server.");}
-
-            let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
-            const payload = { contents: chatHistory };
-            const modelName = 'gemini-2.5-flash-preview-05-20'; 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-            
-            const response = await fetch(apiUrl, {
+	    // Call our own backend proxy endpoint instead of Google's API
+            const response = await fetch('/api/generate-writing-content', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ 
+                    prompt: prompt,
+                    model: modelName 
+                }) // Send the constructed prompt and desired model
             });
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: { message: "Failed to parse error response from API." } }));
-                console.error("API Error Response:", errorData);
-                throw new Error(`API Error (${response.status}): ${errorData.error?.message || response.statusText || 'Unknown API error'}`);
+                const errorData = await response.json().catch(() => ({ error: `Server error: ${response.statusText}` }));
+                throw new Error(errorData.error || `Server responded with status ${response.status}`);
             }
 
             const result = await response.json();
-            
+
             if (result.candidates && result.candidates.length > 0 &&
                 result.candidates[0].content && result.candidates[0].content.parts &&
                 result.candidates[0].content.parts.length > 0) {

@@ -1,9 +1,13 @@
 # app.py
 import os
 import time
-from flask import Flask, render_template, jsonify, url_for
+from flask import Flask, render_template, jsonify, request, url_for
+import requests
+import logging
 
 app = Flask(__name__)
+
+logging.basicConfig(level=logging.INFO)
 
 # --- Configuration for API Key ---
 GEMINI_API_KEY = None
@@ -75,12 +79,109 @@ def writing_helper_page():
 def typing_game_page():
     return render_template('typing_game.html', current_game_key='typing_game', all_games=available_games)
 
-@app.route('/get-gemini-api-key')
-def get_gemini_api_key():
-    if GEMINI_API_KEY:
-        return jsonify({'apiKey': GEMINI_API_KEY})
-    else:
-        return jsonify({'error': 'API Key not configured on server'}), 404
+@app.route('/api/generate-writing-content', methods=['POST'])
+def generate_writing_content():
+    if not GEMINI_API_KEY:
+        app.logger.error("API call failed: Gemini API key is not configured on the server.")
+        return jsonify({'error': 'API key not configured on the server.'}), 500
+
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Invalid JSON in request body.'}), 400
+        
+    prompt = data.get('prompt')
+    model_name = data.get('model', 'gemini-2.5-pro')
+
+    if not prompt:
+        return jsonify({'error': 'No prompt provided.'}), 400
+
+    GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
+    
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}]
+    }
+    
+    try:
+        app.logger.info(f"--- Calling Gemini API for Writing Helper ---")
+        app.logger.debug(f"URL: {GEMINI_API_URL}")
+        app.logger.debug(f"Payload: {payload}")
+        
+        response = requests.post(GEMINI_API_URL, json=payload, timeout=60)
+        
+        app.logger.info(f"--- Gemini API Response Status: {response.status_code} ---")
+        try:
+            response_json = response.json()
+            app.logger.debug(f"--- Gemini API Response Body: {response_json} ---")
+        except requests.exceptions.JSONDecodeError:
+            app.logger.error(f"--- Gemini API Response Body (Not JSON): {response.text} ---")
+            response.raise_for_status()
+            return jsonify({'error': 'Received non-JSON response from AI service.'}), 502
+
+        response.raise_for_status()
+        return jsonify(response_json)
+        
+    except requests.exceptions.RequestException as e:
+        app.logger.error(f"Error calling Gemini API for writing helper: {e}")
+        return jsonify({'error': 'Failed to communicate with the generative AI service.'}), 502
+
+
+@app.route('/api/generate-typing-phrases', methods=['POST'])
+def generate_typing_phrases():
+    if not GEMINI_API_KEY:
+        app.logger.error("API call failed: Gemini API key is not configured on the server.")
+        return jsonify({'error': 'API key not configured on the server.'}), 500
+
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Invalid JSON in request body.'}), 400
+        
+    prompt = data.get('prompt')
+    model_name = data.get('model', 'gemini-2.5-flash')
+
+    if not prompt:
+        return jsonify({'error': 'No prompt provided.'}), 400
+
+    GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
+    
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "responseMimeType": "application/json",
+            "responseSchema": {
+                "type": "OBJECT",
+                "properties": {
+                    "phrases": {
+                        "type": "ARRAY",
+                        "items": {"type": "STRING"}
+                    }
+                }
+            }
+        }
+    }
+    
+    try:
+        app.logger.info(f"--- Calling Gemini API for Typing Game ---")
+        app.logger.debug(f"URL: {GEMINI_API_URL}")
+        app.logger.debug(f"Payload: {payload}")
+        
+        response = requests.post(GEMINI_API_URL, json=payload, timeout=60)
+        
+        app.logger.info(f"--- Gemini API Response Status: {response.status_code} ---")
+        try:
+            response_json = response.json()
+            app.logger.debug(f"--- Gemini API Response Body: {response_json} ---")
+        except requests.exceptions.JSONDecodeError:
+            app.logger.error(f"--- Gemini API Response Body (Not JSON): {response.text} ---")
+            response.raise_for_status()
+            return jsonify({'error': 'Received non-JSON response from AI service.'}), 502
+
+        response.raise_for_status()
+        return jsonify(response_json)
+        
+    except requests.exceptions.RequestException as e:
+        app.logger.error(f"Error calling Gemini API for typing game: {e}")
+        return jsonify({'error': 'Failed to communicate with the generative AI service.'}), 502
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

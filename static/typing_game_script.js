@@ -93,20 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
 
-    // --- API and Phrase Generation ---
-    async function getApiKeyFromServer() {
-        try {
-            const response = await fetch('/get-gemini-api-key'); 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: "Failed to fetch API key, server error."}));
-                throw new Error(errorData.error || `Server responded with ${response.status}`);
-            }
-            const data = await response.json();
-            if (data.apiKey) { return data.apiKey; } 
-            else { throw new Error(data.error || "API key not found in server response."); }
-        } catch (error) { console.error("Failed to fetch API key:", error); throw error; }
-    }
-
     function constructTypingPrompt(difficulty, maxScore) {
         let effectiveDifficulty;
         let complexityDescription;
@@ -146,36 +132,23 @@ Example response for a medium level: {"phrases": ["The quick brown fox.", "Jumps
             gameMessageBox.style.display = 'block';
         }
         try {
-            const apiKey = await getApiKeyFromServer();
             const prompt = constructTypingPrompt(gameState.difficulty, gameState.maxScores[gameState.difficulty]);
-            let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
-            const payload = {
-		    contents: chatHistory,
-		    generationConfig: {
-			    responseMimeType: "application/json",
-			    responseSchema: {
-				    type: "OBJECT",
-				    properties: {
-					    "phrases": {
-						    "type": "ARRAY",
-						    "items": { "type": "STRING" }
-					    } 
-				    } 
-			    }
-		    }
-	    };
+            const modelName = 'gemini-2.5-flash-lite-preview-06-17';
 
-            const modelName = 'gemini-2.5-flash-latest';
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-            // the phrase collection is executing in the background as an async
-			
-			const response = await fetch(apiUrl, {
-				  method: 'POST',
-				  headers: { 'Content-Type': 'application/json' },
-				  body: JSON.stringify(payload)
-				});
+            const response = await fetch('/api/generate-typing-phrases', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt: prompt,
+                    model: modelName
+                })
+            });
+	
+	    if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: `Server error: ${response.statusText}` }));
+                throw new Error(errorData.error || `Server responded with status ${response.status}`);
+            }
 
-            if (!response.ok) { throw new Error(`API Error: ${response.status}`); }
             const result = await response.json();
             const text = result.candidates[0].content.parts[0].text;
             const parsedJson = JSON.parse(text);
